@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block facility_content %}
+
+  {% for u in addedsubrules %} 
+  <div class="modal fade" id="warning-{{ u.id }}" >
+      <form method="POST" class="modal-dialog modal-dialog-centered" id="delfaci" style="
+      justify-content: center;
+      align-items: center;
+      margin-left: 28%;
+      padding: 30px; 
+      border-radius: 5px;
+      text-align: center;">
+        {% csrf_token %}
+          <div class="modal-content ">
+              <label class="modalpopup"><p style="margin: 20px;">Are you sure you want to remove {{ u.title }}</p></label>
+              <p style="font-size: smaller; color: red; text-align: center; padding-inline: 2rem; font-style: italic;">If you click YES, some data of {{ u.title }} will be deleted</p>
+              <div class="modal-footer" style="justify-content: center; align-items: center;">
+                  <button type="button" class="btn-no" data-bs-dismiss="modal">NO</button>
+                  <button class="btn-yes"><a href="{% url 'facility:delusrules' u.id %}">YES</a></button>
+              </div>
+          </div>
+      </form>
+  </div>
+  {% endfor %} 
+<!-- -----------------------------------------------ADD RULES--------------------------------------------- -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <form method="POST" class=" modal-dialog modal-dialog-centered" id="add_faci">{% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel" >Add User Sub Rules</h5>
+          <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+        </div>
+        <div class="modal-body">
+          <label class="modalpopup">Title</label><br>
+          {{mform.title}}
+          <label class="modalpopup">Description</label><br>
+          <textarea placeholder="Input Description" name="description" aria-valuetext='{{mform.description}}'></textarea>
+        
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" ><a>Add Rules</a></button><br>
+          
+         
+        </div>
+      </div>
+    </form>
+  </div>
+    
+<!-- ----------------------------------------------USER SUB RULES----------------------------------------------------------- -->
+
+<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:umainback' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
+    <div class="table">
+      {% csrf_token %}
+      <div class="margin">
+        <input type="text" class="facilabel" value="{{suser.user_type}}" style=" font-size: larger; height: fit-content; width: 35%; margin-top: 1rem;" disabled>
+      <card class="card">
+        <h5 style="font-weight: bold; margin-bottom: 1px;">Main Rules</h5>
+        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+          <tbody class="tablerule">
+            {% for u in umainrules %} 
+          <tr>
+            <td name="mainrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td style="width:5rem;"><a href="{% url 'facility:delumstatus' u.id %}">🗑️</a></td>
+            {% empty %}
+            <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+        <h5 style="font-weight: bold; margin-bottom: 1px;">Sub Rules</h5>
+        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+          <tbody class="tablerule">
+          {% for u in usubrules %} 
+          <tr>
+            <td name="subrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td style="width:5rem;"><a href="{% url 'facility:delusstatus' u.id %}">🗑️</a></td>
+            {% empty %}
+            <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+        <h5 style="font-weight: bold; margin-bottom: 1px;">Promo Rules</h5>
+        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+          <tbody class="tablerule">
+            {% for u in upromorules %} 
+          <tr>
+            <td name="promorule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td style="width:5rem;"><a href="{% url 'facility:delupstatus' u.id %}">🗑️</a></td>
+            {% empty %}
+            <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+    </card>
+    <button class="setbtn" style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"  data-bs-target="#staticBackdrop">
+          <!-- setfmstatus_one   -->
+          <a href="{% url 'facility:setumstatus_one' %}">Set</a>
+          </button>
+          <div class="vline"></div>
+          <div class="menurules" style="border: 1px solid #DCDCDC;">
+            <button class="mrules" style="background: #FFFFFF;"><a href="{% url 'facility:userRules' suser.id %}">Main Rules</a></button>
+            <button class="srules" style="background-color: #ffcc01;" ><a style="color: #FFFFFF;" href="{% url 'facility:userSubRules' suser.id %}">Sub Rules</a></button>
+            <button class="prules"><a href="{% url 'facility:userPromoRules' suser.id %}">Promo Rules</a></button>
+          </div>
+          <!-- <form method="POST"> {% csrf_token %} -->
+          <div id="overflowTest" style="margin-left: 33rem; height: 400px;">
+          {% for u in addedsubrules %} 
+          <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setusstatus' u.id %}">Add</a></button>
+          <!-- <button class="btneditrules"style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:updateusubrules' u.id %}">Edit</a></button> -->
+          <button class="btndelrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;" data-bs-toggle="modal" data-bs-target="#warning-{{ u.id}}" data-usertype-mainrule-title="{{ u.title }}"  data-usertype-mainrules-id="{{ u.id }}">Delete</button> 
+            <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
+              
+              <h3 class="titletxt">{{ u.title }}</h3><br>
+              <div class="hline"></div>
+              
+              <section style="margin:10px; font-size: 14px;  height: 400px;">
+              <ul style="width: fit-content; ">
+                <li>Description: {{ u.description }}</li>
+              </ul>
+              <br>
+              <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div> 
+            </section>
+            </div>
+            {% empty %}
+            <h3 style="opacity: 0.3;">No Available Rules</h3>
+            {% endfor %}
+          </div>
+        <!-- </form> -->
+    </div>
+    <button data-bs-toggle="modal" data-bs-target="#staticBackdrop"  type="button" class="btnrules" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Rules</button>    <!-- <button type="submit" class="add-fac" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Facility</button> -->
+
+  </div>
+    
+  </div>
+ 
+
+  {% endblock %}

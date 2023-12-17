@@ -1,0 +1,43 @@
+body{
+    background-image: url("../images/basebg.PNG");
+    background-repeat: no-repeat;
+    background-size: 100%;
+  }
+
+.list-group-item.active-link {
+    background-color: #faca04;
+    color: #000000;
+}
+
+.list-group-item:hover {
+    /* Define styles for hover state */
+    background-color: #f0f0f0;
+    color: #000000;
+}
+
+.content-container {
+    margin-top: 2%;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+h1{
+    color: #000000;
+}
+
+.table-divs{
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+}
+
+th, tr{
+    font-size: 30px;
+}
+
+td{
+    font-size: 70px;
+    font-weight: bold;
+}

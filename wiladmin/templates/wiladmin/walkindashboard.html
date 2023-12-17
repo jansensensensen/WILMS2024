@@ -1,0 +1,67 @@
+{% extends 'wiladmin/base.html' %} {% load static %} {% block body_block %}
+
+<link rel="stylesheet" href="{% static 'css/walkindashboard.css' %}" />
+<body>
+  <div class="label-page">WALK-IN</div>
+  <div class="table" style="overflow-y: auto; height: 70%;">
+  <div class="content-container">
+    <div class="table-wrapper-scroll-y my-custom-scrollbar">
+      <table class="table table-bordered table-striped mb-0" id="table">
+        <caption>
+          Booking List
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Reference ID</th>
+            <th scope="col">User ID</th>
+            <th scope="col">Schedule</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bookings in bookings %}
+          <tr id="tabledata">
+            <td>{{ bookings.referenceid }}</td>
+            <td>{{ bookings.user_id }}</td>
+            <td>{{ bookings.start_time }} - {{bookings.end_time}}</td>
+            {% if bookings.status == 'Pending' %}
+
+            <td style="color: orange">{{ bookings.status }}</td>
+
+            <td class="actions">
+              <form
+                action="updatebooking/{{ bookings.bookingid }}"
+                method="POST"
+              >
+                {% csrf_token %}
+                <input type="submit" value="Book" class="book" />
+              </form>
+            </td>
+
+            {% else %}
+
+            <td style="color: green">{{ bookings.status }}</td>
+
+            <td class="actions">
+              <form
+                action="deletebooking/{{ bookings.bookingid }}"
+                method="POST"
+              >
+                {% csrf_token %}
+                <input type="submit" value="Logout" class="logout" />
+              </form>
+            </td>
+
+            {% endif %}
+            {% empty %}
+            <h3 style="position: fixed; margin-top: 20%; margin-left: 32%; opacity: 0.3;">No Available Rules</h3>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+{% endblock %}

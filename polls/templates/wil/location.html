@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/userdashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/WILLOGO.png' %}">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" />
+
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body style="background-color: #FECC00;">
+    <div class="content">
+        <div class="header">
+            <div >
+                <a href="{% url 'polls:userprofile' %}">
+                    <img src="{% static 'images/profile.png' %}" alt="Profile Icon" class="profile-icon" style="width: 50px; height: 50px; margin-right:46px; position: relative; right: 20px;">
+                </a>
+                
+                </a>
+                
+                 <img src="{% static 'images/WILLOGO.png' %}" alt="WIL LOGO" class="logo" style="margin-right:100px; border: 2px solid #000000;">
+                
+            </div>
+    <div class="arealocation-container" style = "color:#ffffff; background-color:#000000; border: 1px solid #ffffff; height:220px">
+        <div class="button-overlay">
+            <div class="mobile-buttons">
+                {% if area_id %}
+                <h3>ASSIGNED AREA: <span style="color: red; text-decoration: underline;">{{ area_id }}</span></h3>
+                {% else %}
+                <h4>Assigned Area: N/A</h4>
+                {% endif %}
+            </div>
+
+            <div class="image-container">
+
+                <img src="{% static 'images/area.png' %}" alt="area" class="image-fit"/>
+                {% if area_id == "A1" %}
+                <button class="areaA1-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A2" %}
+                <button class="areaA2-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A3" %}
+                <button class="areaA3-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A4" %}
+                <button class="areaA4-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A5" %}
+                <button class="areaA5-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A6" %}
+                <button class="areaA6-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A7" %}
+                <button class="areaA7-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A8" %}
+                <button class="areaA8-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% elif area_id == "A9" %}
+                <button class="areaA9-button"><i class="fas fa-map-marker-alt"></i></button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="location-container" style="background-color:#ffffff; color:#000000; border: 1px solid #000000;" >
+        <div class="mobile-screen">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <div class="mobile-buttons">
+            <h3>GUIDELINES</h3>
+
+            <div>
+                 <h4>TIME MONITORING</h4>
+                 <ol style="text-align:left; margin:5px">
+                    <li>Once your walk-in booking has been confirmed, you are automatically credited time</li>
+                    <li>Use the facility map to locate your area.</li>
+                    <li>To view your running time, click the time monitoring button</li>
+                 </ol>
+                 <br>
+                <br>
+                <br>
+                <button class="time-button"  style = "color:#ffffff; background-color:#000000; border: 2px solid #ffffff;">TIME MONITORING</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        document.querySelector('.time-button').addEventListener('click', function() {
+
+            window.location.href = "{% url 'polls:timer' %}";
+        });
+    </script>
+    
+    <script>
+        function updateTimer() {
+            $.ajax({
+                url: '{% url "polls:get_timer_data" %}',
+                dataType: 'json',
+                success: function (data) {
+                    if (!data.session_ended) {
+                        var formattedTime = data.minutes.toString().padStart(2, '0') + ':' + data.seconds.toString().padStart(2, '0');
+                        $('#timer').text(formattedTime);
+                        if (data.minutes === 0 && data.seconds === 0) {
+                            showNotification("WILDSPACE", "Your time has ended!");
+                        }
+                    } else {
+                        $('#timer').text('00:00');
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            updateTimer(); 
+            setInterval(updateTimer, 1000); 
+        });
+    </script>
+</body>
+</html>
+

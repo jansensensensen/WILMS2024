@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block facility_content %}
+ 
+<!-- ----------------------------------------------FACILITY TABLE----------------------------------------------------------- -->
+<div style="height: fit-content;">
+  
+
+<div class="label-page">SETTINGS</div>
+    <div class="table">
+      <!-- <h4 class="subtext">Facility Table</h4><br> --><br>
+      <h1 style="font-size: 30px; font-weight: bolder; background-color: #e9cd5f; padding: 10px;">FACILITY</h1>
+      <table cellspacing="2" style="display: block; margin-top: content; display: block;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Facility Name</th>
+            <th>Rate/HR</th>
+            <th>Capacity</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for f in facility %} 
+          <tr>
+            <td>{{ f.id }}</td>
+            <td>{{ f.facilityname }}</td>
+            <td>₱{{ f.rateperhour }}</td>
+            <td>{{ f.capacity }}</td>
+            {% empty %}
+            <td colspan="4">No Available Facility</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+        <br>
+        <h1 style="font-size: 30px; font-weight: bolder; background-color: #e9cd5f; padding: 10px;">FACILITY RULES</h1>   
+              <table cellspacing="2" style="display: block; margin-top: content; display: block;">
+                <thead>
+                  <tr>
+                    <th>FACILITY</th>
+                    <th>MAIN RULES</th>
+                    <th>PROMO RULES</th>
+                    <th>SUB RULES</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  {% for sf in setting_facility %}
+                  <tr>
+                    <td>{{ sf.facility }}</td>
+                    <td>{{ sf.mainrules}}</td>
+                    <td>{{ sf.promorules }}</td>
+                    <td>{{ sf.subrules }}</td>
+                    {% empty %}
+                    <tr>No Available Facility Rules</tr>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              <br>
+              <h1 style="font-size: 30px; font-weight: bolder; background-color: #e9cd5f; padding: 10px;">USER TYPE RULES</h1>   
+                    <table cellspacing="2" style="display: block; margin-top: content; display: block;">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>USER TYPE</th>
+                          <th>MAIN RULES</th>
+                          <th>PROMO RULES</th>
+                          <th>SUB RULES</th>
+                        </tr>
+                      </thead>
+              
+                      <tbody>
+                        {% for su in setting_usertype %}
+                        <tr>
+                          <td style="width: 10%;">{{ su.id }}</td>
+                          <td>{{ su.user_type }}</td>
+                          <td>{{ su.mainrules }}</td>
+                          <td>{{ su.promorules }}</td>
+                          <td>{{ su.subrules }}</td>
+                          {% empty %}
+                          <tr>No Available User Rules</tr>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    <br>
+                    <h1 style="font-size: 30px; font-weight: bolder; background-color: #e9cd5f; padding: 10px;">CALENDAR</h1>   
+                          <table cellspacing="2" style="display: block; margin-top: content; display: block;">
+                            <thead>
+                              <tr>
+                                <th>START</th>
+                                <th>END</th>
+                                <th>EVENTNAME</th>
+                                <th>FACILITY</th>
+                              </tr>
+                            </thead>
+                    
+                            <tbody>
+                              {% for e in event %} 
+                              <tr>
+                                <td>{{ e.start }}</td>
+                                <td>{{ e.end }}</td>
+                                <td>{{ e.event_name }}</td>
+                                <td>{{e.facility}}</td>
+                                {% empty %}
+                                <tr colspan="4">No Available Event</tr>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          <br>
+                          <h1 style="font-size: 30px; font-weight: bolder; background-color: #e9cd5f; padding: 10px;">FACILITY DELETED</h1>   
+                                <table cellspacing="2" style="display: block; margin-top: content; display: block;">
+                                  <thead>
+                                    <tr>
+                                      <th>ID</th>
+                                      <th>FACILITY NAME</th>
+                                      <th>RATE/HOUR</th>
+                                      <th>CAPACITY</th>
+                                      <th>ACTION</th>
+                                    </tr>
+                                  </thead>
+                            
+                                  <tbody>
+                                    {% for f in del_facility %} 
+                                    <tr>
+                                      <td>{{ f.id }}</td>
+                                      <td>{{ f.facilityname }}</td>
+                                      <td>₱{{ f.rateperhour }}</td>
+                                      <td>{{ f.capacity }}</td>
+                                      <td><button class="btndel" id="delfaci"><a href="{% url 'facility:restoreFacility' f.id %}">Restore</a></button></td>
+                                      {% empty %}
+                                      <tr>No Available Facility</tr>
+                                    </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+    </div>
+
+  {% endblock %}

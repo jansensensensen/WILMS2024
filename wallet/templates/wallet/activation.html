@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+{%load static%}
+<html>
+  <head>
+    <title>WILMS | Account Activation</title>
+    <link href="{% static 'icon/favicon3.ico' %}" rel="shortcut icon">
+    <link href="{% static 'facility/extended.css' %}" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+@keyframes slideFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    margin-left: 3%; /* New left position after entering */
+  }
+}
+
+@keyframes slideExitLeftFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    margin-left: 3%; /* Keep consistent with the final position in slideFromLeft */
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+    margin-left: -200px; /* Return to the initial position outside the viewport */
+  }
+}
+
+.info {
+  color: #000;
+  background: rgba(246, 247, 231, 0.9); 
+  border-top: 13px solid #e8e800;
+  justify-content: center;
+  margin-top: 25%;
+  margin-left: 47%;
+  align-items: center;
+  padding: 20px; 
+  border-radius: 5px;
+}
+
+.warning {
+  position: fixed;
+  border-left: 13px solid #e8e800;
+  color: rgb(232, 214, 214);
+  background: rgba(74, 67, 67, 0.748);  
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  justify-content: center;
+  width: fit-content;
+  margin-top: 43%;
+   /* Initial position outside the viewport */
+  align-items: center;
+  padding: 20px; 
+  border-radius: 5px;
+  opacity: 0; /* Start with zero opacity */
+  animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 2s forwards;
+}
+
+.error {
+  position: fixed;
+  border-left: 13px solid #6f0000;
+  color: rgb(232, 214, 214);
+  background: rgba(74, 67, 67, 0.748);  
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  justify-content: center;
+  width: fit-content;
+  margin-top: 43%;
+   /* Initial position outside the viewport */
+  align-items: center;
+  padding: 20px; 
+  border-radius: 5px;
+  opacity: 0; /* Start with zero opacity */
+  animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 2s forwards;
+  
+}
+
+.slideFromLeftAnimation {
+  animation: slideFromLeft 0.5s ease forwards;
+}
+
+          button.adminlabel{
+    position: fixed;
+    display: block;
+    right: 2%;
+    width: fit-content;
+    height: 100px;
+    background: #ffcc0100;
+    top: 0rem;
+    align-items: center;
+    border: none;
+    font-weight: bolder;
+    font-size: 22px;
+    box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.25);
+  }
+            a{
+          text-decoration: none;
+          color: #000000;
+      }
+      a:hover{
+        text-decoration: none;
+        color: #000000;
+      }
+      body {
+        background-color: #d3d3d3;
+        background-image: linear-gradient(315deg, #d3d3d3 0%, #eccc68 74%);
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+      }
+      .card {
+        border: none;
+        background-color: #f9f9f9;
+        padding: 20px;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .hidden {
+        display: none;
+      }
+      #form-section,
+      #text-section {
+        margin: 0;
+        padding: 0;
+      }
+      .login-form h6,
+      h1 {
+        text-align: center;
+      }
+      button#koisk {
+  opacity: 1;
+  z-index: 999999;
+  transform: translateX(-100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  margin-left:25%; 
+  font-size: 16px;   
+            position: fixed;
+            color: rgb(232, 214, 214);
+            background: #ffcc01;
+            filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+            justify-content: left;
+            width: max-content;
+            margin-top: 43%;
+            height: max-content;
+             /* Initial position outside the viewport */
+            align-items: center;
+            padding: 15px; 
+            border-radius: 15px;
+}
+button#koisk:hover{
+  animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 2s forwards;
+}
+a.menugroup.active-link{
+    color:#fff;
+  }
+a.menugroup {
+    /* Other styles for .menugroup */
+    /* ... */
+    font-weight: 800;
+    font-size: 21px;
+    color:#000;
+    padding-bottom: 10.5px;
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.25));
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0);
+    transition: border-bottom 0.3s ease; /* Change expand to ease */
+    
+    }
+    a.menugroup:hover {
+    color: #fff;
+    border-bottom: 3px solid rgba(64, 45, 0, 0.8);
+    transition: border-bottom 0.5s ease forwards;
+    
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row" style="margin: 0; padding: 0">
+        <div id="form-section" class="col-md-6" style="padding: 0">
+          <div
+            class="card"
+            style="border-radius: 15px 0px 0px 15px; border-right: solid 0.5px"
+          >
+            <h1>Account Activation</h1>
+            <form id="activation-form" method="post">
+              <div class="login-form">
+                {% csrf_token %}
+                <h6>Login to activate your account</h6>
+                <div class="form-group">
+                  <label for="email">Email:</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    name="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="password">Password:</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    name="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="login-btn"
+                  style="background-color: #faca04"
+                >
+                  Login
+                </button>
+              </div>
+              <div class="rfid-form hidden">
+                <h2>RFID Activation</h2>
+                <div class="form-group">
+                  <label for="rfid_value">RFID Value:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="rfid_value"
+                    id="rfid_value"
+                    placeholder="Enter RFID value"
+                  />
+                </div>
+              </div>
+              <div id="submitbtn">
+                <button
+                  type="submit"
+                  class="btn btn-success hidden"
+                  id="activate-btn"
+                >
+                  Activate Account
+                </button>
+              </div>
+            </form>
+            <script>
+              document.addEventListener("DOMContentLoaded", function () {
+                const loginForm = document.querySelector(".login-form");
+                const rfidForm = document.querySelector(".rfid-form");
+                const loginButton = document.getElementById("login-btn");
+                const activateButton = document.getElementById("activate-btn");
+                const emailInput = document.getElementById("email");
+                const passwordInput = document.getElementById("password");
+
+                loginButton.addEventListener("click", function () {
+                  // Get the input values
+                  const email = emailInput.value;
+                  const password = passwordInput.value;
+
+                  // Simulate authentication success (you should replace this with your actual authentication logic)
+                  const isAuthenticated = true;
+
+                  if (isAuthenticated) {
+                    // Authentication is successful, proceed to show the RFID form
+                    loginForm.classList.add("hidden");
+                    rfidForm.classList.remove("hidden");
+                    activateButton.classList.remove("hidden");
+                  } else {
+                    // Display an error message using window.alert
+                    window.alert(
+                      "Invalid login credentials. Please try again."
+                    );
+                  }
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div id="text-section" class="col-md-6" style="padding: 0">
+          <div
+            class="card"
+            style="border-radius: 0px 15px 15px 0px; width: 500px"
+          >
+             <img
+              src="{% static 'img/login.PNG' %}"
+              alt="Description of the image"
+              style="margin-left: -100px; margin-right: -100px"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <ul class="center" >
+      <div>
+        <button class="adminlabel" id="koisk" style="left: 82%;"><a class="menugroup menugroup-action {% if 'home' in request.path %}active-link{% endif %}" href="{% url 'wallet:index' %}">😺 BACK TO MAIN PAGE</a></button></div>
+      {% if messages %}
+      {% for message in messages %}
+       
+          {% if message.tags == 'success' %}
+          <div>
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                <h4 style="margin:1px; font-size: 16px;">✅ Success!</h4>{{ message }}</div>
+          {% elif message.tags == 'warning' %}
+          <div>
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+              <h4 style="margin:1px; font-size: 16px;">⚠️ Warning!</h4>{{ message }}</div>
+          {% elif message.tags == 'error' %}
+          <div>
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                <h4 style="margin:1px; font-size: 16px;">⛔ Oops!</h4>{{ message }}</div>
+          {% endif %} 
+        {% endfor %}
+        {% endif %}
+  
+  </ul>
+  </body>
+</html>

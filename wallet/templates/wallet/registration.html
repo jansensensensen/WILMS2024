@@ -1,0 +1,797 @@
+{% load static %} {% block body_block %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WILMS</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap"
+  />
+  <link rel="icon" href="{% static 'img/title.PNG' %}" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"> </script>
+
+<style>
+    a.menugroup {
+    /* Other styles for .menugroup */
+    /* ... */
+    font-weight: 800;
+    font-size: 21px;
+    color:#000;
+    padding-bottom: 1.5px;
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.25));
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0);
+    transition: border-bottom 0.3s ease; /* Change expand to ease */
+    
+    }
+    a{
+      text-decoration: none;
+      color: #000000;
+  }
+  a:hover{
+    text-decoration: none;
+    color: #000000;
+  }
+    a.menugroup:hover {
+    color: #fff;
+    border-bottom: 10px solid rgba(64, 45, 0, 0.8);
+    transition: border-bottom 0.5s ease forwards;
+    
+    }
+    nav.horizontal {
+    position: fixed;
+    display:block;
+    width: 100%;
+    /* background-color: #fecc00; */
+    height:100px;
+    overflow: hidden;
+    top: 0px;
+    left: 0;
+    transition: all 0.3s ease;
+  }
+  nav.horizontal.sticky {
+        /* padding: 15px 50px; */
+        position: fixed;
+        top: 0;
+        background: #fac004; /* Background color for the sticky navbar */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.9);
+        height: fit-content;
+        color: #0000;
+        text-emphasis-color: #0000;
+      }
+
+  
+
+  nav.horizontal ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav.horizontal li {
+    float: left;
+  }
+
+  nav.horizontal li a {
+    display: block;
+    color: #333;
+    text-align: center;
+    padding: 14px 16px;
+    height: 100px;
+    text-decoration: none;
+  }
+
+  nav.horizontal li a:hover {
+    color: #333;
+  }
+  
+  nav.horizontal ul.right {
+    float: right;
+  }
+  nav.horizontal ul.left{
+    float: left;
+  }
+  nav.horizontal ul.center{
+    float: center;
+  }
+  nav.horizontal li a img {
+    top: 0rem;
+    align-items: center;
+    width: 200px;
+    height: flex;
+    margin-right: 10px;
+    right: 20rem;
+    align-items: center;
+  }
+  
+  button.btn-primary{
+    width: fit-content;
+    height: 36.41px;
+    color: #000000;
+    font-weight: 500;
+    font-size: 14px;
+    
+    background-color: #ffcc01;
+    border: none;
+    border-radius: 5px;
+  }
+  button.btn-primary:hover{
+    color: #FFCD02;
+    background: #FFFFFF;
+  }
+  button:hover{
+    cursor: pointer;
+  }
+  *::-webkit-scrollbar-thumb {
+      opacity: 0;
+    background-color: #ffcc0186; /* Change the color of the scrollbar thumb */
+    border-radius: 5px; /* Add rounded corners to the scrollbar thumb */
+  }
+  
+  /* Optional: Style the scrollbar track */
+  *::-webkit-scrollbar-track {
+    opacity: 0;
+    background-color: #e8e1ae; /* Change the color of the scrollbar track */
+  }
+  
+  /* Optional: Style the scrollbar itself */
+  *::-webkit-scrollbar {
+    opacity: 0;
+    margin-left: 0%;
+    width: 0px; /* Adjust the width of the scrollbar */
+  }
+  
+  
+  @keyframes slideFromLeft {
+    0% {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+      margin-left: 3%; /* New left position after entering */
+    }
+  }
+  
+  @keyframes slideExitLeftFadeOut {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+      margin-left: 3%; /* Keep consistent with the final position in slideFromLeft */
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-100%);
+      margin-left: -200px; /* Return to the initial position outside the viewport */
+    }
+  }
+  
+  .info {
+    color: #000;
+    background: rgba(246, 247, 231, 0.9); 
+    border-top: 13px solid #e8e800;
+    justify-content: center;
+    margin-top: 25%;
+    margin-left: 47%;
+    align-items: center;
+    padding: 20px; 
+    border-radius: 5px;
+    animation: slideFromLeft 0.5s ease forwards;
+  }
+  
+  .warning {
+    position: fixed;
+    border-left: 13px solid #e8e800;
+    color: rgb(232, 214, 214);
+    background: rgba(74, 67, 67, 0.748);  
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    justify-content: center;
+    width: fit-content;
+    margin-top: 43%;
+     /* Initial position outside the viewport */
+    align-items: center;
+    padding: 20px; 
+    border-radius: 5px;
+    opacity: 0; /* Start with zero opacity */
+    animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 4s forwards;
+  }
+  .success {
+  position: fixed;
+  border-left: 13px solid #069201;
+  color: rgb(232, 214, 214);
+  background: rgba(74, 67, 67, 0.748);  
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  justify-content: center;
+  width: fit-content;
+  margin-top: 43%;
+   /* Initial position outside the viewport */
+  align-items: center;
+  padding: 20px; 
+  border-radius: 5px;
+  opacity: 0; /* Start with zero opacity */
+  animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 10s forwards;
+}
+  .error {
+    position: fixed;
+    border-left: 13px solid #6f0000;
+    color: rgb(232, 214, 214);
+    background: rgba(74, 67, 67, 0.748);  
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    justify-content: center;
+    width: fit-content;
+    margin-top: 43%;
+     /* Initial position outside the viewport */
+    align-items: center;
+    padding: 20px; 
+    border-radius: 5px;
+    opacity: 0; /* Start with zero opacity */
+    animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 4s forwards;
+    
+  }
+    button{
+    width: auto;
+    align-items: center;
+    padding: 2px;
+    background: #FFCC01;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    border: none;
+    text-decoration: none;
+    /* padding: 20px; */
+    /* padding-bottom: 20px; */
+    padding-inline: 15px;
+  }
+  
+
+button.adminlabel{
+      position: fixed;
+      display: block;
+      right: 2%;
+      width: fit-content;
+      height: 100px;
+      background:#fac004;
+      top: 0rem;
+      align-items: center;
+      border: none;
+      font-weight: 700px;
+      font-size: 22px;
+      box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.25);
+    }
+button.adminlabel:hover{
+    border-radius: 0px;
+}
+    *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+
+}
+
+
+html{
+    scroll-behavior: smooth;
+}
+
+.navbar {
+        position: fixed;
+        width: 100%;
+        height: 100px;
+        z-index: 3;
+        padding: 30px 0;
+        font-family: "Poppins", sans-serif;
+        transition: all 0.3s ease;
+      }
+
+      .navbar .max-width {
+        max-width: 1300px;
+        padding: 0 80px;
+        margin: auto;
+        margin-top: -30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+.navbar .logo a{
+    font-size: 35px;
+    font-weight: 600;
+    color: #fff  /* color of the Name WALL in WALLET */
+}
+.navbar .logo a span{
+    color: #fecc04;
+    transition: all 0.3s ease;
+}
+.navbar .menu li{
+    height: inherit;
+    list-style: none;
+    display: inline-block;
+}
+.navbar .menu li a{
+    color: #fff; /* here is the color for Login, Register, etc. in header */
+    display:block;
+    font-size: 16px;
+    letter-spacing: 1px;
+    margin-left: 25px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+.navbar .menu li a:hover{
+    color: #fac004;
+}
+.navbar.sticky {
+        /* padding: 15px 50px; */
+        position: fixed;
+        top: 0;
+        background: #fac004; /* Background color for the sticky navbar */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.9);
+        height: 100px;
+        color: #0000;
+}
+
+
+.menu-btn{
+    color: #fff; 
+    /* //menu bar color  */
+    font-size: 30px;
+    cursor: pointer;
+    display: none; 
+    /* removes the display of the bar  */
+
+}
+
+section{
+    padding: 100px;
+}
+.banner-container{
+    position: relative;
+    width: 100%;
+    height: 110vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.4)), url('{% static "img/canvabg.png" %}');
+    background-size: cover;
+    background-position: center;
+}
+.container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1300px;
+            padding: 0 80px;
+            margin: auto;
+        }
+.left-section {
+    flex: 1;
+    padding: 20px 0;
+    order: 1;
+    width:  100px;
+    align-self: flex-start;
+}
+
+.right-section {
+    flex: 1;
+    padding: 2  0px;
+    order: 2;
+    align-self: flex-start;
+}
+.right-section form{
+    max-width: 300px; 
+    margin-left: 120px;
+    margin-top: 50px;
+    text-align: left; 
+}
+.right-section h2{
+  margin-left: 120px;
+    font-size: 30px;
+    font-weight: 600;
+    text-align: left;
+    
+    text-transform: uppercase;    
+    color: #fff;
+    margin-top: 100px;
+    margin-bottom: -150px;
+}
+
+
+
+label {
+    display: block; 
+    margin-top: 10px;
+    }
+
+    /* LOGIN TEXT???  */
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+
+    width: 100%;
+    padding: 5%;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px; 
+
+    }
+
+    /* LOGIN BUTTON IN FORM  */
+
+    input[type="submit"] {
+        background-color: #fecc04;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #9C7B16; 
+    }
+
+.banner{ 
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    top: 0%;
+    height: calc(100vh - 260px); /* where i edited the alignment of the login form  */
+    color: aliceblue;
+
+}
+.banner h1{
+    font-size: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.banner p{
+    margin: 20px auto;
+    font-weight: 100;
+    line-height: 25px;
+
+}
+.btn{
+    width: 200px;
+    padding: 15px 0;
+    margin: 20px 10px;
+    background: #fecc04;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    border: 3px solid #fecc04;
+    border-radius: 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover{
+    background-color:#9C7B16 ;
+    border-color: #9C7B16 ;
+
+}
+
+/* responsive media query sheeesh */
+
+@media (max-width:991px){
+
+    .navbar .max-width{
+        padding: 0 50px;
+    }
+}
+@media (max-width:947px){
+    .menu-btn{
+        display: block;
+        z-index: 999;
+    }
+    .banner{
+        max-width: 930px;
+    }
+    .banner h1{
+        font-size: 70px;
+    }
+    .banner p{
+        font-size: 20px;
+    }
+    .banner .btn{
+        font-size: 20px;
+    }
+    menu-btn i.active::before{
+        content: "\f00d";
+    }
+    .navbar .menu{
+        position: fixed;
+        height: 100vh;
+        width: 100%;
+        left: -100%;
+        top: 0;
+        background: #0000;
+        text-align: center;
+        padding-top: 80px;
+        transition: all 0.3s ease;
+    }
+    .navbar .menu .active{    
+        left: 0;
+}
+.navbar .menu li{
+    display: block;
+}
+.navbar .menu li a{
+    display: inline-block;
+    margin: 20px 0;
+    font-size: 20px;
+}
+}
+
+@media (max-width:690px){
+    .navbar .max-width{
+        padding: 0 23px;
+    }
+    .banner h1{
+        font-size: 60px;
+    }
+    .banner .btn{
+        font-size: 20px ;
+    }
+}
+
+@media (max-width:500px){
+
+    .banner h1{
+        font-size: 20px;
+    }
+    .banner p{
+        font-size: 13px;
+        text-align: center;
+    }
+    .banner .btn{
+        font-size: 14px;
+        width: 150px;
+    }
+    .banner{
+        padding: 0 20px;
+
+    }
+
+}
+.All-Font{
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* LOGIN FORM CSS  */
+  body {
+        background: url("{% static 'img/wilms.JPG' %}");
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+      .form-group {
+        height: 100px;
+        margin-top: -30px;
+      }
+      .form-group label {
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: -20px;
+      }
+      .form-group input {
+        width: 100%;
+        height: 40px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        padding: 5px;
+        font-size: 15px;
+      }
+      .regform{
+        margin-top: 27%;
+      }
+
+
+
+
+
+
+</style>
+</head>
+<body>  
+  <ul class="center" >
+
+    {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'info' %}
+        
+      <div class="center" id="overlay" style="position: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(5, 4, 0, 0.5);
+        z-index: 99999999;
+        opacity: 1;
+        transition: opacity 5s ease;">
+      <ul style="list-style: none; text-align: center; width: 100%; margin-left: 40%;">
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="width: 40%; height: auto; word-wrap: break-word;  margin: 0 auto; text-align: center;">
+            <div style="background-color: #ffcc01b6; width: 100%; padding: 1rem; border: 0px; "><h4 style="margin:1px; font-size: 16px;">😺 You are registered!</h4></div>
+            <br>{{ message }}
+              <br>
+              <button style="margin-top: 10%;" type="button" class="btn btn-secondary" onclick="window.location.href='/wallet/user_login'">OK</button>
+          </li>
+      </ul>
+  </div>
+  {% endif %} 
+  {% endfor %}
+  {% endif %}
+  <script>
+      function closeOverlay() {
+          document.getElementById('overlay').style.display = 'none';
+      }
+  </script></ul>
+
+    <section class="banner-container">
+        <div class="banner">
+            
+            <div class="left-section">
+                <br>
+    <br>
+    <br>
+    <br>
+    <br>
+                
+    <h1>Innovative, Streamlined, Organized</h1>
+    Wildcats Innovation Labs offers a versatile platform with a built-in
+    wallet for seamless transactions, a reservation system for easy lab
+    access, clear rules for a structured environment, and crowd control
+    functions ensuring optimal user flow. Join us for a streamlined
+    innovation experience.
+  </p>
+  <button class="btn">Discover Now</button>
+        </div>
+
+        <div class="right-section">
+          <h2>Create Account</h2>
+          <div class="regform" >
+            <form enctype="multipart/form-data" method="POST" onsubmit="return validateForm()">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="{{ profile_form.first_name.id_for_label }}">First Name:</label><br>
+                {{ profile_form.first_name }}
+              </div>
+              <div class="form-group">
+                <label for="{{ profile_form.last_name.id_for_label }}">Last Name:</label><br>
+                {{ profile_form.last_name }}
+              </div>
+              <div class="form-group">
+                <label for="{{ user_form.email.id_for_label }}">Email:</label><br>
+                {{ user_form.email }}
+                <p id="email-error" class="error-message"></p>
+              </div>
+              <div class="form-group">
+                <label for="{{ user_form.password.id_for_label }}">Password:</label><br>
+                {{ user_form.password }}
+              </div>
+              <div class="form-group">
+                <label for="{{ profile_form.confirm_password.id_for_label }}">Confirm Password:</label><br>
+                {{ profile_form.confirm_password }}
+                <p id="password-error" class="error-message"></p>
+              </div>
+              <div class="regbtn">
+                <input type="submit" name="" value="Register" class="btn btn-primary">
+              </div>
+            </form>
+          </div>
+
+                
+        </div>
+    </section>
+    <nav class="horizontal">
+      <ul class="left" style="margin-left: 2rem;">
+        <li>
+        <a href="{% url 'wallet:index' %}"><img style="background-color: #fac004; padding: 5px; border-radius: 5px;" src="{% static 'media/WILMS.png' %}" alt="Home"></a></li>
+      </ul>
+      <ul class="center">
+        {% if messages %}
+        {% for message in messages %}
+         
+            {% if message.tags == 'success' %}
+            <div>
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                  <h4 style="margin:1px; font-size: 16px;">✅ Success!</h4>{{ message }}</div>
+                  
+            {% elif message.tags == 'warning' %}
+            <div>
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                <h4 style="margin:1px; font-size: 16px;">⚠️ Warning!</h4>{{ message }}</div>
+            {% elif message.tags == 'error' %}
+            <div>
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                  <h4 style="margin:1px; font-size: 16px;">⛔ Oops!</h4>{{ message }}</div>
+            {% endif %} 
+          {% endfor %}
+          {% endif %}
+      </ul>
+      <ul class="right">
+        <!-- <button class="adminlabel" style="left:70%; padding-inline: 10px; border-radius: 5px; height: 60px; margin-top: 1.4%;"><a class="menugroup" href="/wallet/register">REGISTER</a></button> -->
+        <button class="adminlabel" type="button" id="loginBtn" onclick="window.location.href='/wallet/user_login'" style="width: fit-content;left:80%;padding-inline: 10px; border-radius: 5px; height: 60px; margin-top: 1.4%;"><a id="loginBtn" class="menugroup" data-bs-target="" href="#">BACK TO MAIN PAGE</a></button>            
+      </ul>
+  
+    </nav>
+    {% if messages %}
+    {% if message.tags == 'success' %}
+    <script>
+      $(document).ready(function () {
+        window.location.href = "{% url 'wallet:user_login' %}";
+      });
+    </script>
+    {% endif %}
+  {% endif %}
+  
+  {% if error_message %}
+    <script>
+      $(document).ready(function () {
+        alert("{{ error_message }}");
+      });
+    </script>
+  {% endif %}
+
+<script>
+      $(document).ready(function () {
+        $(window).scroll(function () {
+          if ($(this).scrollTop() > 30) {
+            // Adjust the scroll position where the navbar becomes sticky
+            $(".horizontal").addClass("sticky");
+          } else {
+            $(".horizontal").removeClass("sticky");
+          }
+        });
+      });
+
+  //toggle menu
+  $(".menu-btn").click(function () {
+    $(".horizontal .menu").toggleClass("active");
+    $(".menu-btn i").toggleClass("active");
+  });
+  function validateForm() {
+    var email = document.getElementById("id_email").value;
+    var firstNameInput = document.getElementById("id_first_name");
+    var lastNameInput = document.getElementById("id_last_name");
+    var password = document.getElementById("id_password").value;
+    var confirmPassword = document.getElementById("id_confirm_password").value;
+    var emailErrorElement = document.getElementById("email-error");
+    var passwordErrorElement = document.getElementById("password-error");
+    var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailPattern.test(email)) {
+      emailErrorElement.innerHTML = "Invalid email address";
+      return false;
+    } else {
+      emailErrorElement.innerHTML = "";
+    }
+
+    if (password !== confirmPassword) {
+      passwordErrorElement.innerHTML = "Passwords do not match";
+      return false;
+    } else {
+      passwordErrorElement.innerHTML = "";
+    }
+
+    firstNameInput.value =
+      firstNameInput.value.charAt(0).toUpperCase() +
+      firstNameInput.value.slice(1);
+    lastNameInput.value =
+      lastNameInput.value.charAt(0).toUpperCase() +
+      lastNameInput.value.slice(1);
+
+    return true;
+  }
+</script>
+{% endblock %}

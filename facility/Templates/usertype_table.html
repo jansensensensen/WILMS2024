@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block facility_content %}
+
+  <div class="modal" id="usertype" > 
+    <form method="POST" class="modal-dialog modal-dialog-centered" id="Add_faci">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="staticBackdropLabel2">User Type</h5>
+          </div>
+          <div class="modal-body">
+            {% csrf_token %}
+            <!-- <input list="user_type" name="user_type" placeholder="Choose Type of Schedule"/>
+            <datalist id="user_type">
+              <option value = "{{ forms.user_type }} ">
+            </datalist> -->
+            <select name="user_type" id="inputGroupSelect01">
+              <option name="user_type" type="submit" value="">All</option>
+              {% for u in usertype %}
+              <option name="user_type" type="submit"  value ="{{u.pk}}">{{u.user_type}}</option>
+              {% endfor %}
+            </select>
+             
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><a href="{% url 'facility:usertable' %}">Cancel</a></button>
+              <button type="submit" class="btn btn-primary" data-bs-target="update_faci">Add User Type</button>
+          </div>
+      </div>
+  </form>
+  </div>
+
+<!-- BUTTON TO ADD FACILITY -->
+    <!-- <button type="submit" class="add-fac" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Facility</button> -->
+    <div class="label-page" style="padding: 10px;">User</div>
+    <div class="table">
+      <h3 style="font-weight: 50px; ">User Type Rules Table</h3><br>
+      <table class="center" cellspacing="2" style="display: center; padding:0; height: 100vh; overflow: auto;">
+        <button data-bs-toggle="modal" data-bs-target="#usertype" data-bs-toggle="modal" class="btn btn-primary" >Choose User Type</button>  
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User Type</th>
+            <th>MAIN RULES</th>
+            <th>PROMO RULES</th>
+            <th>SUB RULES</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for su in setting_usertype %}
+          <tr>
+            <td style="width: 10%;">{{ su.id }}</td>
+            <td>{{ su.user_type }}</td>
+            <td>{{ su.mainrules }}</td>
+            <td>{{ su.subrules }}</td>
+            <td>{{ su.promorules }}</td>
+            <td><button class="btndel">
+              <a class="btndel" href="{% url 'facility:userRules' su.id %}">Edit</a>
+            </button></td>
+            {% empty %}
+            <h3 style="position: absolute; margin-top: 20%; margin-left: 32%; opacity: 0.3;">No User Type</h3>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>   
+      <button type="submit" class="add-fac" ><a class="text" href="{% url 'facility:facility' %}">Done</a></button>      
+    </div>
+
+
+    {% endblock %}
