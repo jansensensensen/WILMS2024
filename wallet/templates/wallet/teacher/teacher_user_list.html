@@ -104,11 +104,11 @@
         </div>
         <div class="chart-container" style="max-height: 400px; overflow: auto;">
           <div class="chart">
-            <h2 style="font-size: 24px;">Points Awarded Chart</h2>
+            <h2 style="font-size: 24px; color: #000;">Points Awarded Chart</h2>
             <canvas id="pointsPerSenderChart" style="max-width: 400px;"></canvas>
           </div>
           <div class="chart">
-            <h2 style="font-size: 24px;">Transactions Over Time</h2>
+            <h2 style="font-size: 24px;color: #000">Transactions Over Time</h2>
             <canvas id="transactionsOverTimeChart" style="max-width: 600px;"></canvas>
           </div>
           <div class="chart">
@@ -237,7 +237,7 @@
                   <form id="awardPointsForm" method="post" action="">
                       {% csrf_token %}
                       <!-- Form fields for awarding points go here -->
-                      <div class="form-group">
+                      <div class="form-group" hidden>
                           <label for="recipient">Target User:</label>
                           <input type="text" class="form-control" id="recipient" name="recipient" readonly/>
                       </div>
@@ -268,6 +268,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 
     <script>
       $(document).ready(function () {
@@ -338,22 +341,34 @@
 
         // Function to handle "Award Points" button click
         $(document).on("click", ".awardPointsButton", function () {
-          $("#actionsModal").modal("hide");
-          var recipient = $(this).data("recipient");
-          $("#recipient").val(recipient);
-          var acctype = $(this).data("acctype");
-          console.log(acctype);
-          if (acctype === "Teacher User" || acctype === "Superuser") {
-            // Display an error message or perform the desired action to prevent awarding points to teachers
-            alert("You cannot award points to Teacher Users or Superusers.");
-            return; 
+            $("#actionsModal").modal("hide");
+            var recipient = $(this).data("recipient");
+            $("#recipient").val(recipient);
+            var acctype = $(this).data("acctype");
+            console.log(acctype);
+
+            if (acctype === "Teacher User" || acctype === "Superuser") {
+                // Display an error message or perform the desired action to prevent awarding points to teachers
+                Swal.fire({
+                    title: 'Error',
+                    text: 'You cannot award points to Teacher Users or Superusers.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
             }
 
             if (parseFloat($("#pointstogive strong").text()) === 0) {
-            // If the available points are 0, disable the "Award Points" button
-            alert("You have no points to award at the moment.");
-            return;
-  }
+                // If the available points are 0, disable the "Award Points" button
+                Swal.fire({
+                    title: 'Error',
+                    text: 'You have no points to award at the moment.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+        
 
           // Auto-fill date and time fields with current date and time
           var currentDate = new Date();
@@ -402,15 +417,23 @@
               // Update the point balance in the table or perform any other necessary actions
 
               $("#awardPointsModal").modal("hide"); // Hide the modal
-              window.alert(
-                "\nYOU HAVE SUCCESSFULLY COMPLETED THE TRANSACTION.\n"
-              );
-              window.location.reload();
-            },
+
+                Swal.fire({
+                    title: 'Success',
+                    text: 'You have successfully completed the transaction.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload();
+                })},
             error: function (xhr, status, error) {
-              window.alert(
-                "\nYOU HAVE INSUFFICIENT BALANCE FOR THE TRANSACTION.\n"
-              );
+              Swal.fire({
+                  title: 'Error',
+                  text: 'You no longer have points to give.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+              });
+              
               // Handle the error response
               console.error(error); // Log the error for debugging purposes
               // Display an error message or perform any other necessary actions
