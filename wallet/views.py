@@ -400,16 +400,10 @@ class CoinTransactionCreateAndDashboardView(LoginRequiredMixin, View):
             messages.error(request, "Form is not valid. Please check the fields.")
             alert_message = 'Top-up request failed.'
 
-        # Generating JavaScript to show an alert
-        response = f'''
-            <script>
-                alert("{alert_message}");
-                // You can redirect the user or perform any other actions after the alert.
-                window.location.href="/wallet/createCoin/";
-            </script>
-        '''
+        # Add alert_message to context
+        context = {'alert_message': alert_message, 'form': form}
 
-        return HttpResponse(response)
+        return render(request, self.template_name, context)
 
 
 
@@ -557,14 +551,22 @@ class SettingsView(LoginRequiredMixin, View):
 
 
 class ChangePasswordView(PasswordChangeView):
-    template_name = 'wallet/change_password.html'  # Create a template for the change password page
-    success_url = reverse_lazy('wallet:change-password')  # Redirect to this URL after a successful password change       
+    template_name = 'wallet/change_password.html'
+    
     @method_decorator(user_passes_test(is_verified_user))
     def form_valid(self, form):
+        print("okay")
         response = super(ChangePasswordView, self).form_valid(form)
+
+        # Print form errors
+        if form.errors:
+            print(form.errors)
+
         messages.success(self.request, 'Your password has been changed successfully.')
-        form.data = form.initial  # Clear the form data        
+        form.data = form.initial  # Clear the form data
         return response
+    
+    success_url = reverse_lazy('wallet:change-password')
 
 #Increment 4
 method_decorator(csrf_exempt)  # Use csrf_exempt for this view since you will be making an AJAX request
@@ -613,8 +615,13 @@ class TeacherUserListView(View):
     def get(self, request):
         try:
             # Filter transactions by the current user as sender
+            user = User.objects.get(email=request.user)
+            profile = UserProfileInfo.objects.get(user_id=request.user)
+            email = user.email
+            coin_balance = profile.coin_balance
+            point_balance = profile.point_balance
             transactions = Transaction.objects.filter(sender=request.user)
-            users = UserProfileInfo.objects.all()
+            users = UserProfileInfo.objects.filter(user__is_staff=False, user__is_superuser=False)
             userT = get_user_model().objects.all()
             teacher_profile = UserProfileInfo.objects.get(user=request.user)  # Get the teacher's profile
             points_to_give = teacher_profile.points_to_give
@@ -622,6 +629,10 @@ class TeacherUserListView(View):
             transactions = []
 
         context = {
+            'email':email,  
+            'user':user,
+            'coin_balance':coin_balance,
+            'point_balance':point_balance,
             'users': users,
             'transactions': transactions,
             'userT': userT,
@@ -669,14 +680,13 @@ class TeacherUserListView(View):
                         'last_name': user.last_name,
                         'point_balance': user.point_balance,
                     })
-
                 return JsonResponse({'success': True, 'users': user_data})
-
             else:
-                return JsonResponse({'success': False, 'error': 'Not enough points to award.'})
+                print('wrong')
+                return JsonResponse({'success': False, 'error': 'Not enough points to award.'},status=400)
 
         except (get_user_model().DoesNotExist, UserProfileInfo.DoesNotExist):
-            pass
+            return JsonResponse({'success': False, 'error': 'User not found.'}, status=400)
 
 
 

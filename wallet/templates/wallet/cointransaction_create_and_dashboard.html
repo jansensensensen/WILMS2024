@@ -496,15 +496,20 @@
       const formData = new FormData(form);
 
       // Send an AJAX request to the server
+      // Send an AJAX request to the server
       fetch(".", {
         method: "POST",
         body: formData,
       })
         .then((response) => {
-          // Display an alert if the form is successfully saved
+          // Display SweetAlert if the form is successfully saved
           if (response.ok) {
-            alert("Top-up request sent!");
-            form.reset();
+            Swal.fire({
+              title: "Top-up request sent!",
+              icon: "success",
+            }).then(() => {
+              form.reset();
+            });
           }
         })
         .catch((error) => {
