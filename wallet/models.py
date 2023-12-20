@@ -82,6 +82,7 @@ class CoinTransaction(models.Model):
     image_receipt = models.ImageField(upload_to='coin_transaction_receipts/')
     date_in_receipt = models.DateField()
     is_completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     is_denied = models.BooleanField(default=False)
 
     @property

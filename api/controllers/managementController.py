@@ -14,6 +14,7 @@ from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSer
 from api.jwt_util import decode_user
 # from datetime import datetime, date, timedelta
 from rest_framework.decorators import api_view
+from wallet.models import User as WalletUser
 # from django.contrib.auth.models import User
 from django.http import JsonResponse
 # from rest_framework_simplejwt.tokens import RefreshToken
@@ -68,16 +69,29 @@ class ManagementController():
     @api_view(['DELETE'])
     def removeBookingAttendee(request, attendee_id):
         attendee= Attendee.objects.get(id=attendee_id)
-        attendee.delete()
-        serializer = AttendeeSerializer(attendee)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        print(attendee.booking.user)
+        userFound=WalletUser.objects.get(email=attendee.name)
+        if userFound.email==attendee.name:
+            
+            return Response({"error":"cannot remove owner"},status=status.HTTP_200_OK)
+        else:
+            attendee.delete()
+            serializer = AttendeeSerializer(attendee)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
     @api_view(['POST'])
     def addBookingAttendee(request,booking_id):
         request_body = json.loads(request.body.decode('utf-8'))
         booking=Booking.objects.get(id=booking_id)
+        attendeeCount=Attendee.objects.filter(booking=booking_id).count()
+        if attendeeCount>=booking.venue.capacity:
+            return Response({"error":"Max capacity for venue has been reached"},status=status.HTTP_200_OK)
+        attendeeFound= Attendee.objects.filter(booking=booking_id,name=request_body['name']).count()
+        if attendeeFound!=0:
+            return Response({"error":"user already exists"},status=status.HTTP_200_OK)
         user_id=request_body['user_id']
         name=request_body['name']
-        Attendee.objects.create(name=name,booking=booking,user=user_id)
+        Attendee.objects.create(name=name,booking=booking,user_id=user_id)
         return Response({"attendee added"},status=status.HTTP_200_OK)
     @api_view(['PUT'])
     def editBooking(request,booking_id):

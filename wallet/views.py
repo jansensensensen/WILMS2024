@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from decimal import Decimal
 from django.views.generic.list import ListView
 from django.db.models import Q
@@ -191,26 +192,44 @@ class DashboardView(View):
         firstname = request.session.get('firstname') 
         if request.user.is_superuser:
             try:
+                # Get the current user's profile
                 profile = UserProfileInfo.objects.get(user_id=request.user)
-                email=User.objects.get(email=request.user)
+                email = User.objects.get(email=request.user)
                 coin_balance = profile.coin_balance
                 point_balance = profile.point_balance
+                
+
+                # Get all students and rank them by the amount of points
+                students_ranking = UserProfileInfo.objects.filter(user__is_superuser=False, user__is_staff=False).annotate(
+                    total_points=Sum('point_balance')
+                ).order_by('-total_points')
+
+                # Query recent approved transactions
+                recent_transactions = CoinTransaction.objects.filter(
+                    requestee=request.user,
+                    is_completed=True
+                ).order_by('-date_in_receipt')[:3]  # Limit to 3 most recent transactions
+
             except UserProfileInfo.DoesNotExist:
                 coin_balance = 0.0
                 point_balance = 0.0
+                students_ranking = []
+                recent_transactions = []
 
             context = {
                 'coin_balance': coin_balance,
                 'point_balance': point_balance,
-                'email':email,
-                'firstname':firstname,
+                'email': email,
+                'firstname': firstname,
+                'students_ranking': students_ranking,
+                'recent_transactions': recent_transactions,
             }
 
             return render(request, 'wallet/dashboard.html', context)
         else:
             response_data = {'message': 'You do not have permission to access this page.'}
             return JsonResponse(response_data, status=403)
-        # return render(request,{'firstname':firstname})
+        
 
 # def dis_base(request):
 #     firstname = request.session.get('firstname') 
@@ -222,6 +241,8 @@ class UserListView(View):
         firstname = request.session.get('firstname') 
         if request.user.is_superuser:
             try:
+                user = User.objects.get(email=request.user)
+                email = user.email
                 transactions = Transaction.objects.all().order_by('-date')
                 users = UserProfileInfo.objects.all()
                 userT=User.objects.all()
@@ -230,6 +251,8 @@ class UserListView(View):
 
             
             context = {
+                'email':email,  
+                'user':user,
                 'users': users,
                 'transactions': transactions,
                 'userT':userT,
@@ -395,15 +418,13 @@ class CoinTransactionCreateAndDashboardView(LoginRequiredMixin, View):
             form.save()
             messages.success(request, self.success_message)
             alert_message = 'Top-up request successfully sent.'
+            success_data = {'success': True, 'message': alert_message}
+            return JsonResponse(success_data)
         else:
-            # If the form is invalid, show the errors to the user.
             messages.error(request, "Form is not valid. Please check the fields.")
             alert_message = 'Top-up request failed.'
-
-        # Add alert_message to context
-        context = {'alert_message': alert_message, 'form': form}
-
-        return render(request, self.template_name, context)
+            error_data = {'success': False, 'message': alert_message}
+            return JsonResponse(error_data)
 
 
 
@@ -505,6 +526,7 @@ class GetTransactionDetailsView(UserPassesTestMixin, View):
                 'date_in_receipt': transaction.date_in_receipt.strftime('%Y-%m-%d %H:%M:%S'),  # Format the date as desired
                 'status': 'COMPLETED' if transaction.is_completed and not transaction.is_denied else 'DENIED' if transaction.is_denied and not transaction.is_completed else 'PENDING',
                 'image_receipt_url': transaction.image_receipt.url,
+                'created_at':transaction.created_at,
             }
 
             return JsonResponse(transaction_data)
@@ -720,29 +742,29 @@ class AdminAwardPointsToTeacherView(View):
 
     @method_decorator(user_passes_test(lambda user: user.is_superuser))
     def post(self, request):
-        user_id = request.POST.get('teacher')  # Assuming the form field is named 'teacher'
+        user_id = request.POST.get('teacher')
         points_awarded = float(request.POST.get('points_awarded', 0))
 
         try:
-            teacher = User.objects.get(id=user_id)  # Get the user by their ID
+            teacher = User.objects.get(id=user_id)
         except User.DoesNotExist:
             messages.error(request, 'Selected teacher not found.')
-            return redirect('award_points_to_teacher')
+            return JsonResponse({'error': 'Selected teacher not found.'}, status=400)
 
         if points_awarded <= 0:
             messages.error(request, 'Points awarded must be greater than 0.')
-            return redirect('award_points_to_teacher')
+            return JsonResponse({'error': 'Points awarded must be greater than 0.'}, status=400)
 
-        # Create a new AdminPointAward record
         AdminPointAward.objects.create(admin=request.user, teacher=teacher, points_awarded=points_awarded)
 
-        # Update the teacher's points_to_give
         teacher_profile = UserProfileInfo.objects.get(user=teacher)
         teacher_profile.points_to_give += points_awarded
         teacher_profile.save()
 
         messages.success(request, f'{points_awarded} points awarded to {teacher.email}.')
-        return redirect('wallet:award_points_to_teacher')
+        
+        # Return the points_awarded in the response
+        return JsonResponse({'points_awarded': points_awarded, 'teacher_email': teacher.email})
     
 
 # RFID

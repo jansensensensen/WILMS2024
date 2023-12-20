@@ -21,7 +21,7 @@ from wallet.models import User as WalletUser
 from django.http import JsonResponse
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
-
+from django.core.exceptions import ObjectDoesNotExist
 class TapController():
     @api_view(['POST'])
     def logAttendance(request):        
@@ -30,9 +30,11 @@ class TapController():
         timeNow=datetime.datetime.now().time()
         thirtyMinutes=datetime.datetime.today()+datetime.timedelta(minutes = +30)
         # mao na pra makuha ang name sa user
-        rfid=request_body['rfid']
-        userEmail=UserProfileInfo.objects.get(rfid_value=rfid)
-        
+        rfid=request_body['rfid']        
+        try:
+            userEmail=UserProfileInfo.objects.get(rfid_value=rfid)
+        except UserProfileInfo.DoesNotExist:
+            return JsonResponse({"error":"ID is not found or is unregistered","state":"notFound"},status=status.HTTP_200_OK)
         # store ang email as name variable so name=email in this case sorry bad practice
         name=userEmail
         print(name)

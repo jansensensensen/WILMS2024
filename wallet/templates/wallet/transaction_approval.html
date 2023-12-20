@@ -58,17 +58,26 @@ background-size: cover;
   }
 
   /* Add color styles for status cells */
-  .status-pending {
-    color: yellow;
-  }
+  .status-button {
+  padding: 5px 10px; /* Adjust padding as needed */
+  border: none;
+  cursor: default;
+}
 
-  .status-completed {
-    color: green;
-  }
+.status-pending {
+  background-color: yellow;
+  color: black;
+}
 
-  .status-denied {
-    color: red;
-  }
+.status-completed {
+  background-color: green;
+  color: white;
+}
+
+.status-denied {
+  background-color: red;
+  color: white;
+}
   .list-group-item.active-link {
     /* Define styles for active state */
     background-color: #faca04;
@@ -91,7 +100,7 @@ background-size: cover;
       <label for="filter-select" style="color: black">Filter by Status:</label>
       <select class="form-control" id="filter-select">
         <option value="all">All</option>
-        <option value="COMPLETED">Completed</option>
+        <option value="APPROVED">Approved</option>
         <option value="DENIED">Denied</option>
         <option value="PENDING">Pending</option>
       </select>
@@ -121,21 +130,22 @@ background-size: cover;
             <td>{{ transaction.amount }}</td>
             <td>{{ transaction.date_in_receipt }}</td>
             <!-- prettier-ignore -->
-            <td class="{% if transaction.is_completed %}status-completed{% elif transaction.is_denied %}status-denied{% else %}status-pending{% endif %}">
+            <td>
               {% if transaction.is_completed and not transaction.is_denied %}
-                  COMPLETED
+                <button class="status-button status-completed">APPROVED</button>
               {% elif transaction.is_denied and not transaction.is_completed %}
-                  DENIED
+                <button class="status-button status-denied">DENIED</button>
               {% else %}
-                  PENDING
+                <button class="status-button status-pending">PENDING</button>
               {% endif %}
-          </td>
+            </td>
             > >
             <td>
               <!-- Button to trigger the modal -->
               <button
                 type="button"
                 class="btn btn-primary view-details"
+                style="height: fit-content;"
                 data-toggle="modal"
                 data-target="#transactionModal"
                 data-reference-code="{{ transaction.reference_code }}"
@@ -159,47 +169,51 @@ background-size: cover;
     aria-labelledby="transactionModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="transactionModalLabel">
-            Transaction Details
-          </h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="transactionModalLabel">Transaction Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="transaction-detail">
+          <strong>Reference Code:</strong>
+          <span id="modal-reference-code"></span>
         </div>
-        <div class="modal-body">
-          <p>Reference Code: <span id="modal-reference-code"></span></p>
-          <p>Requestee: <span id="modal-requestee"></span></p>
-          <p>Amount: <span id="modal-amount"></span></p>
-          <p>Date in Receipt: <span id="modal-date-in-receipt"></span></p>
-          <p>Status: <span id="modal-status"></span></p>
-          <img
-            src=""
-            alt="Receipt Image"
-            class="img-fluid"
-            id="modal-image-receipt"
-          />
+        <div class="transaction-detail">
+          <strong>Requestee:</strong>
+          <span id="modal-requestee"></span>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Close
-          </button>
-          <button type="button" class="btn btn-success" id="approve-button">
-            Approve
-          </button>
-          <button type="button" class="btn btn-danger" id="deny-button">
-            Deny
-          </button>
+        <div class="transaction-detail">
+          <strong>Amount:</strong>
+          <span id="modal-amount"></span>
+        </div>
+        <div class="transaction-detail">
+          <strong>Date in Receipt:</strong>
+          <span id="modal-date-in-receipt"></span>
+        </div>
+        <div class="transaction-detail">
+          <strong>Status:</strong>
+          <span id="modal-status"></span>
+        </div>
+        <div class="transaction-detail">
+          <strong>Submitted on:</strong>
+          <span id="modal-date-created"></span>
+        </div>
+        <div class="transaction-detail receipt-image">
+          <strong>Receipt Image:</strong>
+          <img src="" alt="Receipt Image" class="img-fluid" id="modal-image-receipt" />
         </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" id="approve-button">Approve</button>
+        <button type="button" class="btn btn-danger" id="deny-button">Deny</button>
+      </div>
     </div>
+  </div>
   </div>
 </div>
 </body>
@@ -208,6 +222,7 @@ background-size: cover;
   <script>
     // Get the CSRF token from the page's meta tag
     var csrfToken = "{{ csrf_token }}";
+    
 
     function populateTransactionDetails(referenceCode) {
       // Send an AJAX request to retrieve transaction details
@@ -218,16 +233,26 @@ background-size: cover;
           reference_code: referenceCode,
         },
         success: function (data) {
+          var dateCreated = new Date(data.created_at);
+          var formattedDate = dateCreated.toLocaleString();
+          var dateInReceipt = new Date(data.date_in_receipt);
+          var formattedDate1 = dateInReceipt.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          console.log(formattedDate)
           // Update the modal content with transaction details
           $("#modal-reference-code").text(data.reference_code);
           $("#modal-requestee").text(data.requestee);
           $("#modal-amount").text(data.amount);
-          $("#modal-date-in-receipt").text(data.date_in_receipt);
+          $("#modal-date-in-receipt").text(formattedDate1);
           $("#modal-status").text(data.status);
+          $("#modal-date-created").text(formattedDate);
 
           $("#modal-image-receipt").attr(
             "src",
-             data.image_receipt_url
+            data.image_receipt_url
           );
         },
         error: function (error) {

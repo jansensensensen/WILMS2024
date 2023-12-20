@@ -39,16 +39,15 @@ def login(request):
     if(userFound==None):
         return JsonResponse({'message': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    
-    
     user=User(id=userFound.id,username=email)
     refresh=RefreshToken.for_user(user)
     #extra response options below for jwt
     refresh['username']=userFound.email
-    if(userFound.is_superuser or userFound.is_staff):
+    if(userFound.is_superuser):
         refresh['role']='admin'
     else:
         refresh['role']='user'
+    refresh['is_staff']= userFound.is_staff
     data={
         'refresh':str(refresh),
         'access':str(refresh.access_token),
@@ -106,11 +105,11 @@ class BookingByVenue(APIView):
         serializer=BookingSerializer(obj,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class Users(APIView):
-    def get(self,request):
-        users=user.objects.all()
-        serializer=UserSerializer(users,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+# class Users(APIView):
+#     def get(self,request):
+#         users=user.objects.all()
+#         serializer=UserSerializer(users,many=True)
+#         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class AttendeeDetail(APIView):
     def get(self,request,id):

@@ -66,17 +66,16 @@ class BookingController():
         eh,em,es= request_body['endTime'].split(':')
         #subtract their duration
         duration =float((float(eh)*3600+float(em)*60+float(es))-(float(sh)*3600+float(sm)*60+float(ss)))/3600
-        numStudents = request_body['numOfStudents']
+       
         
         numComputers= request_body['numOfComputers']
-        print(numStudents)
+        
         # data={"numOfStudents":numStudents}
         cost=float(0)       
         if(numComputers>0):
             cost+=2*duration        
         else:
             cost+=duration
-        cost*=numStudents
         cost*=facility.facility.rateperhour
         data={"cost":cost}
         return JsonResponse(data)

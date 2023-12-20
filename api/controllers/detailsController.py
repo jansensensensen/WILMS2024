@@ -18,12 +18,19 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
+from datetime import datetime, date, timedelta
 class DetailsController():
     @api_view(['GET'])
     def cancelBooking(request,id):
         # ako lng gistore ug lain variable ang id pra di libog ang query
+        
+        
         booking_id=id
         booking=Booking.objects.get(id=booking_id)
+        if booking.date<datetime.now().date :
+             return Response({"error":"cannot cancel past booking"},status=status.HTTP_200_OK)
+        elif  (booking.date==datetime.now().date and booking.startTime<datetime.now().time()):
+             return Response({"error":"cannot cancel this booking. It may be ongoing"},status=status.HTTP_200_OK)
         user=UserProfileInfo.objects.get(user=booking.user)
         # if coins iya gamit so 0 ang points
         if booking.points==0:

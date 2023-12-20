@@ -28,7 +28,6 @@ class Booking(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='booker',null=True)
     venue=models.ForeignKey(Facility,related_name='venue',to_field='id',on_delete=models.CASCADE,null=True)
     venueName=models.CharField(max_length=50,null=True)
-    venueId=models.IntegerField(null=True,default=0)
     isOverstayingCharged=models.BooleanField(null=True,default=False)
     def __str__(self) -> str:
         return f"REF NO:{self.referenceNo}"

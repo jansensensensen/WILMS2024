@@ -24,8 +24,6 @@ from rest_framework.decorators import api_view,authentication_classes,permission
 # from django.contrib.auth.models import User
 from django.http import JsonResponse
 from facility.models import CalendarEvent
-from polls.models import AssignedArea
-from facility.models import Facility
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
@@ -66,6 +64,15 @@ class CalendarController():
             if serializer.is_valid():
                 points=serializer.validated_data['points']
                 coins=serializer.validated_data['coins']
+                # calculate hours_difference
+                startTime=serializer.validated_data['startTime']
+                endTime=serializer.validated_data['endTime']
+                duration=datetime.combine(date,endTime)-datetime.combine(date,startTime)
+                hours_difference = (duration).total_seconds()/3600.0
+                serializer._validated_data['duration']=hours_difference
+                # check sa mga conflicting bookings
+                startTimeConflictCount= Booking.objects.filter(startTime__gte=startTime,startTime__lte=endTime).count()
+                endTimeConflictCount=Booking.objects.filter(endTime__gte=startTime,endTime__lte=endTime).count()
                 # paid using coins
                 userprofile=UserProfileInfo.objects.get(user=serializer.validated_data['user'])
                 if points == 0:
@@ -80,38 +87,27 @@ class CalendarController():
                     elif userprofile.point_balance >= points and points != 0:
                         userprofile.point_balance -= points
                 date=serializer.validated_data['date']
-                # calculate hours_difference
-                startTime=serializer.validated_data['startTime']
-                endTime=serializer.validated_data['endTime']
-                duration=datetime.combine(date,endTime)-datetime.combine(date,startTime)
-                hours_difference = (duration).total_seconds()/3600.0
-                serializer._validated_data['duration']=hours_difference
+                
                 # set status to booked
                 serializer._validated_data['status']='Booked'
                 #generate unique reference no.
-                #print(serializer.validated_data['venue'])
-                facility=Facility.objects.get(facilityname=serializer.validated_data['venue'])
+                
                 random = str(uuid.uuid4()) # Convert UUID format to a Python string.
                 random = random.upper() # Make all characters uppercase.
                 random = random.replace("-","") # Remove the UUID '-'.
-                refNo= facility.facilityname+random[0:8]
+                refNo= random[0:8]
             
                 while Booking.objects.filter(referenceNo=refNo).count()!=0:
                      random = str(uuid.uuid4()) # Convert UUID format to a Python string.
                      random = random.upper() # Make all characters uppercase.
                      random = random.replace("-","") # Remove the UUID '-'.
-                     refNo= facility.facilityname+random[0:8]
+                     refNo= random[0:8]
                 serializer._validated_data['referenceNo']=refNo
                 userprofile.save()
-                instance=serializer.save()
+                serializer.save()
                 response_data={
                     'message':'Succesfully booked'
                 }
-                
-                usercount=Attendee.objects.filter(booking=instance.id).count()
-                for i in range(usercount):
-                    assignedArea=AssignedArea.objects.create(reference_number=refNo,area_id=facility.facilityname)
-                serializer.validated_data
                 return Response(serializer.data,status=status.HTTP_201_CREATED)
             return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
     def my_random_string(string_length=8):

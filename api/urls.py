@@ -24,7 +24,7 @@ urlpatterns = [
     path('getEvents/', CalendarController.getEvents, name='get events'),
     ##Controllers na wa pa na separate
     path('getAttendees/<id>/',AttendeeDetail.as_view(),name='getBookingAttendees'),
-    path('users/',Users.as_view(),name='getAllUsers'),
+    # path('users/',Users.as_view(),name='getAllUsers'),
 
     #view details na controller
     path('cancelBooking/<id>',DetailsController.cancelBooking,name="cancelbooking"),

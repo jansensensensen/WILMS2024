@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-  <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -9,7 +8,15 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Wallet</title>
+    <title>WILMS | Wallet</title>
+    <link href="{% static 'icon/favicon3.ico' %}" rel="shortcut icon">
+    <link href="{% static 'facility/extended.css' %}" rel="stylesheet">
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"
+      integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
+      crossorigin="anonymous"
+    ></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
     <link
       href="{% static 'bootstrap-4.4.1-dist/css/bootstrap.min.css' %}"
       rel="stylesheet"
@@ -17,27 +24,19 @@
     />
     <link href="{% static 'css/simple-sidebar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/styleBASE.css' %}" rel="stylesheet" />
-
-    <link rel="shortcut icon" href="{% static 'img/title.png' %}" />
     <link
       rel="stylesheet"
       href="{% static 'plugins/fontawesome-free/css/all.min.css' %}"
     />
+    <!-- Scrollbar Custom CSS -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Poppins"
+      href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css"
     />
-    <link
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- Bootstrap core JavaScript -->
+    <!-- <script src="{% static 'js/jquery.min.js' %}"></script> -->
+    <!-- Font Awesome JS -->
     <script src="{% static 'bootstrap-4.4.1-dist/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-
     <script
       defer
       src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
@@ -50,6 +49,8 @@
       integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     {% block headerinclude %} {% endblock %}
     <!-- Style -->
     <style>
@@ -221,12 +222,14 @@
           <div class="row">
             <div class="col-2">
               <!-- Logo  -->
-              <img
-                src="{% static 'img/w3.png' %}"
-                alt="Logo"
-                width="200"
-                height="60"
-              />
+              <a href="{% url 'wallet:index' %}">
+                <img
+                  src="{% static 'img/w3.png' %}"
+                  alt="Logo"
+                  width="200"
+                  height="60"
+                />
+              </a>
             </div>
 
             <div class="col-10 d-flex justify-content-end align-items-center">
