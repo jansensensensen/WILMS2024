@@ -27,7 +27,9 @@ class DetailsController():
         
         booking_id=id
         booking=Booking.objects.get(id=booking_id)
-        if booking.date<datetime.now().date :
+        print(booking.date)
+        print(datetime.now().date())
+        if booking.date<datetime.now().date() :
              return Response({"error":"cannot cancel past booking"},status=status.HTTP_200_OK)
         elif  (booking.date==datetime.now().date and booking.startTime<datetime.now().time()):
              return Response({"error":"cannot cancel this booking. It may be ongoing"},status=status.HTTP_200_OK)

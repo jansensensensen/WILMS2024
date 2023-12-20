@@ -22,7 +22,7 @@ class Booking(models.Model):
     description=models.CharField(max_length=100,null=True)
     isUsed= models.BooleanField(default=False, null=True)
     duration=models.FloatField(default=0)
-    referenceNo=models.TextField(max_length=8,blank=True,unique=True, default=uuid.uuid1)
+    referenceNo=models.CharField(max_length=8,blank=True,unique=True, default=uuid.uuid1)
     officeName=models.CharField(max_length=50,null=True)
     status=models.CharField(max_length=20,null=True, default='Booked')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='booker',null=True)

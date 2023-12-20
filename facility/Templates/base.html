@@ -248,7 +248,7 @@ button#koisk:hover{
    padding: 15px; 
     border-radius: 5px;
     opacity: 0; /* Start with zero opacity */
-    animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 1s 4s forwards;
+    animation: slideFromLeft 0.5s ease forwards, slideExitLeftFadeOut 10s 4s forwards;
     
   }
   div.table{
@@ -388,6 +388,17 @@ html {
 }
   
   </style>
+    <!-- <script type="text/javascript">
+      // Function to reload the current page after a specified interval
+      function reloadPage() {
+        setTimeout(function() {
+          location.reload(true); // Reloads the current page
+        }, 5000); // Adjust the interval (in milliseconds) as needed
+      }
+  
+      // Call the function when the page loads
+      window.onload = reloadPage;
+    </script> -->
 </head>
 <body>
   <ul class="center" >
@@ -465,7 +476,8 @@ html {
   </ul>
   <ul class="center" >
     <div>
-      <button id="koisk" style="left: 100%; width: 30vw; text-align: left;"><a style="font-weight: 800; font-size: 21px;" href="{% url 'wallet:activate_account' %}">😺ACTIVATION KOISK</a></button></div>
+      <button id="koisk" style="left: 100%; width: 30vw; text-align: left;"><a style="font-weight: 800; font-size: 21px;" href="{% url 'wallet:activate_account' %}">😺ACTIVATION KOISK</a></button></div>  
+    
     {% if messages %}
     {% for message in messages %}
      

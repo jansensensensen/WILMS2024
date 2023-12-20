@@ -4,7 +4,18 @@ from django.db.models import F, ExpressionWrapper, DurationField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from wallet.models import User
 # Create your models here.
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Other fields as needed for your notification model
+
+    def __str__(self):
+        return self.message 
+
 class Facility(models.Model):
     facilityname = models.CharField(max_length=250, null=False, unique="facility_name")
     area_id = models.CharField(max_length=250, null=False)
@@ -14,6 +25,11 @@ class Facility(models.Model):
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
     isdeleted = models.BooleanField(default=0)
+    title = models.CharField(max_length=100,null=True)
+    num_pc = models.IntegerField(null=True, default=0)
+    num_attendies = models.IntegerField(null=True)
+    description = models.CharField(max_length=255,null=True, default="")
+    status = models.BooleanField(default=0)
 
     def save(self, *args, **kwargs):
         # Update the modified_at timestamp whenever the object is saved
@@ -41,13 +57,14 @@ class Facility_type(models.Model):
 class Facility_MainRules(models.Model):
     facility = models.ForeignKey(Facility, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=100,null=False, unique="title")
-    points = models.FloatField(blank=False, default=0.00)
+    # points = models.FloatField(blank=False, default=0.00)
     num_pc = models.IntegerField(blank=False, default=0)
     num_attendies = models.IntegerField(blank=False)
     description = models.CharField(max_length=255,null=False)
     rate = models.FloatField()
     person_rate = models.FloatField(default=None)
     status = models.BooleanField(default=0)
+
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -63,13 +80,14 @@ class Facility_MainRules(models.Model):
 class Facility_MainRules_set(models.Model):
     facility = models.CharField(max_length=100,null=True,default=None)
     title = models.CharField(max_length=100,null=False)
-    points = models.FloatField(blank=False, default=0.00)
+    # points = models.FloatField(blank=False, default=0.00)
     num_pc = models.IntegerField(blank=False, default=0)
     num_attendies = models.IntegerField(blank=False, default=0)
     description = models.CharField(max_length=255,null=False, default="")
     rate = models.IntegerField(blank=False, default=0)
     person_rate = models.FloatField(default=None)
     status = models.BooleanField(default=0)
+
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -126,8 +144,11 @@ class Facility_PromoRules(models.Model):
     num_pc = models.IntegerField(default=None)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    is_expired = models.BooleanField(default=0)
+    is_available = models.BooleanField(default=0)
     # capacity = models.IntegerField( default=None)
     num_attendies = models.IntegerField(default=None)
+    
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -148,8 +169,12 @@ class Facility_PromoRules_set(models.Model):
     person_new_rate = models.FloatField(default=None)
     new_rate = models.FloatField(default=None)
     num_pc = models.IntegerField(default=None)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+    # is_expireds = models.BooleanField(default=0)
+    is_expired = models.BooleanField(default=False)
+    is_available = models.BooleanField(default=False)
+
     # capacity = models.IntegerField( default=None)
     num_attendies = models.IntegerField(default=None)
 
@@ -164,14 +189,14 @@ class Facility_PromoRules_set(models.Model):
     def __str__(self):
         return self.title
 
-    def is_expired(self):
-        return self.end_date < timezone.now()
+    # def is_expired(self):
+    #     return self.end_date < timezone.now()
 
-@receiver(post_save, sender=Facility_PromoRules_set)
-def delete_expired_facility(sender, instance, **kwargs):
+# @receiver(post_save, sender=Facility_PromoRules_set)
+# def delete_expired_facility(sender, instance, **kwargs):
     
-    if instance.is_expired():
-        instance.delete()
+#     if instance.is_expired():
+#         instance.delete()
 # class Facility_PromoRules(models.Model):
 #     facility = models.CharField(max_length=100, null=True, default=None)
 #     title = models.CharField(max_length=100,null=False)
@@ -347,15 +372,41 @@ class Transaction(models.Model):
         super().save(*args, **kwargs)
     
 # ----------------------------------------------------------------------------------------------------------------------USER
+class UserType_Rules(models.Model):
+    user_type = models.CharField(max_length=100,null=True,default=None)
+    title = models.CharField(max_length=100,null=False, unique="title")
+    description = models.CharField(max_length=255,null=False)
+    status = models.BooleanField(default=0)
+    adv_booking = models.IntegerField(null=True, default=0)
+    lim_booking = models.IntegerField(null=True, default=0)
+    cancel_fee = models.IntegerField(null=True, default=0)
+    # num_bookings = 
+    created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
+    modified_at = models.DateTimeField(default=timezone.now, null=False)
+
+    def save(self, *args, **kwargs):
+        # Update the modified_at timestamp whenever the object is saved
+        self.modified_at = timezone.now()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+    
+
+
+#     advance booking 2weeks per hr
+# limit of booking per week
+# cancellation fee 30percent
+# number of bookings
+    
 class UserType_MainRules(models.Model):
     user_type = models.CharField(max_length=100,null=True,default=None)
     title = models.CharField(max_length=100,null=False, unique="title")
-    points = models.FloatField(blank=False, default=0.00)
-    num_pc = models.IntegerField(blank=False, default=0)
-    num_attendies = models.IntegerField(blank=False)
     description = models.CharField(max_length=255,null=False)
-    rate = models.IntegerField(blank=False, default=0)
     status = models.BooleanField(default=0)
+    adv_booking = models.IntegerField(null=True, default=0)
+    lim_booking = models.IntegerField(null=True, default=0)
+    cancel_fee = models.IntegerField(null=True, default=0)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -372,13 +423,12 @@ class UserType_MainRules(models.Model):
 
 class UserType_MainRules_set(models.Model):
     user_type = models.CharField(max_length=100,null=True,default=None)
-    title = models.CharField(max_length=100,null=False)
-    points = models.FloatField(blank=False, default=0.00)
-    num_pc = models.IntegerField(blank=False, default=0)
-    num_attendies = models.IntegerField(blank=False, default=0)
+    title = models.CharField(max_length=100,null=False, unique="title")
     description = models.CharField(max_length=255,null=False)
-    rate = models.IntegerField(blank=False, default=0)
     status = models.BooleanField(default=0)
+    adv_booking = models.IntegerField(null=True, default=0)
+    lim_booking = models.IntegerField(null=True, default=0)
+    cancel_fee = models.IntegerField(null=True, default=0)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -427,13 +477,14 @@ class UserType_SubRules_set(models.Model):
 
 class UserType_PromoRules(models.Model):
     user_type = models.CharField(max_length=100,null=True,default=None)
-    title = models.CharField(max_length=100,null=False)
-    description = models.CharField(max_length=100,null=False)
+    title = models.CharField(max_length=100,null=False, unique="title")
+    description = models.CharField(max_length=255,null=False)
     status = models.BooleanField(default=0)
-    new_rate = models.FloatField(blank=False, default=0.00)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    capacity = models.IntegerField(default=0)
+    adv_booking = models.IntegerField(null=True, default=0)
+    lim_booking = models.IntegerField(null=True, default=0)
+    cancel_fee = models.IntegerField(null=True, default=0)
+    is_expired = models.BooleanField(default=0)
+    is_available = models.BooleanField(default=0)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -448,13 +499,14 @@ class UserType_PromoRules(models.Model):
 
 class UserType_PromoRules_set(models.Model):
     user_type = models.CharField(max_length=100,null=True,default=None)
-    title = models.CharField(max_length=100,null=False)
-    description = models.CharField(max_length=100,null=False)
+    title = models.CharField(max_length=100,null=False, unique="title")
+    description = models.CharField(max_length=255,null=False)
     status = models.BooleanField(default=0)
-    new_rate = models.FloatField(blank=False, default=0.00)
-    start_date = models.DateTimeField(null=True,default=timezone.now)
-    end_date = models.DateTimeField(null=True,default=timezone.now)
-    capacity = models.IntegerField(default=0)
+    adv_booking = models.IntegerField(null=True, default=0)
+    lim_booking = models.IntegerField(null=True, default=0)
+    cancel_fee = models.IntegerField(null=True, default=0)
+    is_expired = models.BooleanField(default=0)
+    is_available = models.BooleanField(default=0)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)

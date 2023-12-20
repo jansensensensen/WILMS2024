@@ -65,6 +65,7 @@ class CalendarController():
                 points=serializer.validated_data['points']
                 coins=serializer.validated_data['coins']
                 # calculate hours_difference
+                date=serializer.validated_data['date']      
                 startTime=serializer.validated_data['startTime']
                 endTime=serializer.validated_data['endTime']
                 duration=datetime.combine(date,endTime)-datetime.combine(date,startTime)

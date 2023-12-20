@@ -79,47 +79,47 @@ input[type=datetime-local]{
       {% csrf_token %}
       <div class="margin">
         <input type="text" class="facilabel" value="{{sfacility.facility}}" style=" font-size: larger; width: 40%; margin-top: 1rem;" disabled>
-      <card class="card">
-        <h5 style="font-weight: bold; margin-bottom: 1px;">Main Rules</h5>
-        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
-          <tbody class="tablerule">
-          {% for f in fmainrules %} 
-          <tr>
-            <td class="promo" name="mainrule" value="{{f.id}}">{{f.title}}</td>
-            <td style="width:5rem;"><a href="{% url 'facility:delfmstatus' f.id %}">🗑️</a></td>
-            {% empty %}
-            <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
-          </tr>
-          {% endfor %}
-        </tbody>
-        </table><br>
-        <h5 style="font-weight: bold; margin-bottom: 1px;">Sub Rules</h5>
-        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
-          <tbody class="tablerule">
-          {% for f in fsubrules %} 
-          <tr>
-            <td class="promo" name="subrule" value="{{f.id}}">{{f.title}}</td>
-            <td style="width:5rem;"><a href="{% url 'facility:delfsstatus' f.id %}">🗑️</a></td>
-            {% empty %}
-            <p style="opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
-          </tr><br>
-          {% endfor %}
-        </tbody>
-        </table><br>
-        <h5 style="font-weight: bold; margin-bottom: 1px;">Promo Rules</h5>
-        <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
-          <tbody class="tablerule">
-          {% for f in fpromorules %} 
-          <tr>
-            <td class="promo" name="promo" style="width:20rem; font-weight: bold;" value="{{f.id}}">{{f.title}}</td>
-            <td style="width:5rem;"><a href="{% url 'facility:delfpstatus' f.id %}">🗑️</a></td>
-            {% empty %}
-            <p style="opacity: 0.3; ">no rules added</p>
-          </tr>
-          {% endfor %}
-        </tbody>
-        </table><br>
-    </card>
+        <card class="card">
+          <h5 style="font-weight: bold; margin-bottom: 1px;">Main Rules</h5>
+          <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+            <tbody class="tablerule">
+            {% for f in fmainrules %} 
+            <tr>
+              <td class="promo" name="mainrule" value="{{f.id}}">{{f.title}}</td>
+              <td style="width:5rem;"><a href="{% url 'facility:delfmstatus' f.id %}">🗑️</a></td>
+              {% empty %}
+              <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table><br>
+          <h5 style="font-weight: bold; margin-bottom: 1px;">Sub Rules</h5>
+          <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+            <tbody class="tablerule">
+            {% for f in fsubrules %} 
+            <tr>
+              <td class="promo" name="subrule" value="{{f.id}}">{{f.title}}</td>
+              <td style="width:5rem;"><a href="{% url 'facility:delfsstatus' f.id %}">🗑️</a></td>
+              {% empty %}
+              <p style="opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table><br>
+          <h5 style="font-weight: bold; margin-bottom: 1px;">Promo Rules</h5>
+          <table class="" style=" height: 60px; border-radius: 15px; border-spacing: 2rem; overflow: hidden;">
+            <tbody class="tablerule">
+            {% for f in fpromorules %} 
+            <tr>
+              <td class="promo" name="promo" value="{{f.id}}">{{f.title}}</td>
+              <td style="width:5rem;"><a href="{% url 'facility:delfpstatus' f.id %}">🗑️</a></td>
+              {% empty %}
+              <p style="opacity: 0.3; ">no rules added</p>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table><br>
+      </card>
         </button>
         <button class="setbtn"  type="button"  data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->

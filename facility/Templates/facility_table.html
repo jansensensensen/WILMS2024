@@ -9,16 +9,22 @@
         </div>
         <div class="modal-body">
           {% csrf_token %}
-          <input list="facility" name="facility" placeholder="Choose Type of Schedule"/>
+          <!-- <input list="facility" name="facility" placeholder="Choose Type of Schedule"/>
           <datalist id="facility">
-            <option value="{{forms.facility}}">
-          </datalist>
+            <option value="{{forms.facility_type}}">
+          </datalist> -->
+
+          <select name="facility_type" id="inputGroupSelect01">
+            {% for f in facility_type %}
+            <option name="facility_type" type="submit"  value ="{{f.id}}">{{f.facility_type}}</option>
+            {% endfor %}
+          </select>
 
            
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><a href="{% url 'facility:facility' %}">Cancel</a></button>
-            <button type="submit" class="btn btn-primary" data-bs-target="update_faci">Add Facility</button>
+            <button type="submit" class="btn btn-primary" data-bs-target="update_faci">Change</button>
         </div>
     </div>
 </form>
@@ -30,7 +36,7 @@
     <div class="table">
       <h3 style="font-weight: 50px;">Facility Rules Table</h3><br>
       <table class="center" cellspacing="2" style="display: center;">
-        <!-- <button data-bs-toggle="modal" data-bs-target="#facirules" data-bs-toggle="modal" class="btn btn-primary" >Choose Facility</button>   -->
+        
         <thead>
           <tr>
             <th>ID</th>
@@ -38,6 +44,7 @@
             <th>MAIN RULES</th>
             <th>PROMO RULES</th>
             <th>SUB RULES</th>
+            <th>FACILITY TYPE</th>
             <th>ACTION</th>
           </tr>
         </thead>
@@ -50,6 +57,7 @@
             <td>{{ sf.mainrules }}</td>
             <td>{{ sf.promorules }}</td>
             <td>{{ sf.subrules }}</td>
+            <td style="font-size: smaller; width:max-content ;">{{ sf.facility_type }}<button style="margin-left: 5%;" data-bs-toggle="modal" data-bs-target="#facirules" data-bs-toggle="modal" class="btn btn-primary" >Change</button> </td>
             <td><button class="btndel">
               <a class="btndel" href="{% url 'facility:facilityRules' sf.id %}">Edit</a>
             </button>

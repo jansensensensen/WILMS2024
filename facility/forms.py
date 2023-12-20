@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Revenue_Transaction, Sched_Type, Setting_Facility, Setting_UserType, Transaction, User, User_Type, UserType_MainRules, UserType_MainRules_set, UserType_SubRules
+from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Sched_Type, Setting_Facility, Setting_UserType, Transaction, User, User_Type, UserType_MainRules, UserType_MainRules_set, UserType_PromoRules, UserType_PromoRules_set, UserType_SubRules, UserType_SubRules_set
 
 class FacilityForm(ModelForm):
     facilityname = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Facility Name'}))
@@ -125,7 +125,7 @@ class SettingFacilityUpdateForm(ModelForm):
         fields = ['facility','mainrules','promorules','subrules']
 
 class RulesFacilityForm(ModelForm):
-    facility = forms.ModelChoiceField(widget=forms.Select(), queryset=Facility.objects.only('facilityname'))
+    facility_type = forms.ModelChoiceField(widget=forms.Select(), queryset=Facility_type.objects.only('facility_type'))
 
     class Meta:
         model = Setting_Facility
@@ -166,12 +166,14 @@ class FacilityTable(ModelForm):
 
 class UpdateFacilityForm(ModelForm):
     facilityname = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Facility Name'}))
-    rateperhour = forms.FloatField(widget=forms.TextInput(attrs={'placeholder':'Enter rate per hour'}))
+    # area_id = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Facility Name'}))
+    # rateperhour = forms.FloatField(widget=forms.TextInput(attrs={'placeholder':'Enter rate per hour'}))
     capacity = forms.IntegerField(widget=forms.TextInput(attrs={'placeholder':'Enter Capacity'}))
 
     class Meta:
         model = Facility
-        fields = ['id','facilityname','rateperhour','capacity']
+        fields = ['facilityname','capacity']
+        exclude =['id']
 
     def __str__(self):
         return self.id+ " (" +self.facilityname+ " (" +self.rateperhour +") "+" (" +self.capacity +") "
@@ -435,16 +437,22 @@ class ChartTypeForm(forms.Form):
 
 class UserTypeMainRulesForm(ModelForm):
     # facility = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    points = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Points consumption per week'}))
-    num_pc = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of PC Facility can book'}))
-    num_attendies = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of person can attend'}))
-    description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    rate = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Rate per person'}))
+    
+    # points = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Points consumption per week'}))
+    # num_pc = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of PC Facility can book'}))
+    # num_attendies = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of person can attend'}))
+    
+    # rate = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Rate per person'}))
     # status = forms.BooleanField()
+    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
+    description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
+    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
+    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
+    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+
     class Meta:
         model = UserType_MainRules
-        fields = ['title','points','num_pc','num_attendies','description']
+        fields = ['title','description','adv_booking','lim_booking','cancel_fee']
         exclude = ['status','user_type']  
 
         def __init__(self, *args, **kwargs):
@@ -454,18 +462,17 @@ class UserTypeMainRulesForm(ModelForm):
 #Update Main Rules forms on progress 
 
 class UpdateUserTypeMainRulesForm(ModelForm):
-    user_type = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    points = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Points consumption per week'}))
-    num_pc = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of PC Facility can book'}))
-    num_attendies = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of person can attend'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    rate = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Rate per person'}))
-    status = forms.BooleanField()
+    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
+    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
+    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+
     class Meta:
         model = UserType_MainRules
-        fields = ['user_type','title','points','num_pc','num_attendies','description','rate','status']
-
+        fields = ['title','description','adv_booking','lim_booking','cancel_fee']
+        exclude = ['status','user_type']  
+        
     def clean(self):
         cleaned_data = super().clean()
         facility = cleaned_data.get('facility')
@@ -491,17 +498,16 @@ class UpdateUserTypeMainRulesForm(ModelForm):
     
 # Set Main rules to the user type
 class UserTypeMainRulesSetForm(ModelForm):
-    user_type = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    points = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Points consumption per week'}))
-    num_pc = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of PC Facility can book'}))
-    num_attendies = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of person can attend'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    # rate = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Rate per person'}))
     status = forms.BooleanField()
+    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
+    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
+    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+
     class Meta:
         model = UserType_MainRules_set
-        fields = ['user_type','title','points','num_pc','num_attendies','description','status']
+        fields = ['title','description','adv_booking','lim_booking','cancel_fee', 'status']
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -529,7 +535,7 @@ class UserTypeSubRulesSetForm(ModelForm):
     status = forms.BooleanField()
 
     class Meta:
-        model = Facility_SubRules_set
+        model = UserType_SubRules_set
         fields = ['user_type','title','description','status']
 
         def __init__(self, *args, **kwargs):
@@ -539,14 +545,14 @@ class UserTypeSubRulesSetForm(ModelForm):
 class UserTypePromoRulesForm(ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    new_rate = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Enter new rate'}))
-    start_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'placehodler': 'Start date'}))
-    end_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'placehodler': 'End date'}))
-    capacity = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Enter Capacity'}))
- 
+    # status = forms.BooleanField()
+    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
+    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
+    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+
     class Meta:
-        model = Facility_PromoRules  # Use '=' instead of ':'
-        fields = ['title', 'description','new_rate','start_date', 'end_date', 'capacity']
+        model = UserType_PromoRules
+        fields = ['title','description','adv_booking','lim_booking','cancel_fee', 'status']
         exclude = ['status', 'facility']
 
         def __init__(self, *args, **kwargs):
@@ -555,18 +561,16 @@ class UserTypePromoRulesForm(ModelForm):
 
 # Set Promo rules to the User type 
 class UserTypePromoRulesSetForm(ModelForm):
-    user_type = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    new_rate = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Enter new rate'}))
-    start_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'placehodler': 'Start date'}))
-    end_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'placehodler': 'End date'}))
-    capacity = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Enter Capacity'}))
     status = forms.BooleanField()
+    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
+    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
+    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
 
     class Meta:
-        model = Facility_PromoRules_set
-        fields = ['user_type','title','description','new_rate','start_date', 'end_date', 'capacity','status']
+        model = UserType_PromoRules_set
+        fields = ['user_type','title','description','adv_booking','lim_booking','cancel_fee', 'status']
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

@@ -1,4 +1,6 @@
 import datetime
+from datetime import timedelta
+import pytz
 from django.utils import timezone
 import io
 import time
@@ -20,7 +22,7 @@ from decimal import Decimal
 from io import BytesIO
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from .forms import CalendarEventForm, FacilityForm, FacilityMainRulesForm, FacilityPromoRulesForm, FacilitySubRulesForm, FacilityUpdateForm, Revenue_TransactionForm, RulesFacilityForm, Sched_TypeForm, TransactionForm
-from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Revenue_Transaction, Setting_Facility, Setting_UserType, Transaction, User
+from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Setting_Facility, Setting_UserType, Transaction, User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import View
@@ -48,10 +50,152 @@ from django.http import JsonResponse
 from django.core import serializers
 from .models import Setting_Facility, User_Type, User
 from api.models import Booking, Attendance
+from django.core.signals import request_started
+from .models import Notification  # Import your Notification model
+# import schedule
+# from schedule import every, repeat
+
+import webbrowser
+
+# def reload_current_page():
+#     filename = 'base.html'  # HTML file containing the JavaScript for page reload
+
+#     # Open the HTML file in the default web browser
+#     webbrowser.open(filename, new=2)
+
+# if __name__ == "__main__":
+#     reload_current_page()
 
 
 def is_superuser(user):
     return user.is_superuser  # Check if the user is a superuser
+
+
+# from celery.task import periodic_task
+# from datetime import timedelta
+
+# @periodic_task(run_every=timedelta(seconds=10))
+    # facility_id = request.session.get('facility')
+    # # facilitys = Facility.objects.get(pk=facility_id)
+    # promo_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+    # main_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+
+
+    # utc_time = timezone.now()
+    # ph_timezone = pytz.timezone('Asia/Manila')
+    # current_date = utc_time.astimezone(ph_timezone)
+    # current_day = current_date.strftime('%a').upper()
+                        # notification = f"Promo has been ended to {facilitys.facilityname}."
+                        # messages.success(request, notification)
+                # notification = f"Promo has been set to {facilitys.facilityname}."
+                # messages.success(request, notification)
+
+
+
+
+def create_notification(request, notification_message):
+    # Get the current user (assuming you're using Django's built-in authentication)
+    current_user = request.user
+
+    # Create a new notification instance
+    new_notification = Notification.objects.create(
+        user=current_user,
+        message=notification_message,
+        # Other fields as needed for your Notification model
+    )
+
+    # Save the notification to the database
+    new_notification.save()
+
+
+def apply_promo_and_main_rules(request):
+    facility = request.session.get('facility')
+
+    facility_id = request.session.get('facility')
+    facilitys = Facility.objects.filter(pk=facility_id)
+    promo_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+    main_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+    # Get the current UTC time
+    utc_time = timezone.now()
+
+    # Get the timezone object for 'Asia/Manila'
+    ph_timezone = pytz.timezone('Asia/Manila')
+
+    # Convert the UTC time to the 'Asia/Manila' timezone
+    current_date = utc_time.astimezone(ph_timezone)
+    current_dates = datetime.now().strftime('%a').upper()
+    # ph_timezone = pytz.timezone('Asia/Manila')
+    
+    # url = "http://127.0.0.1:8000/"
+    # interval = 30
+    for promo in promo_list:
+        
+        if promo.start_date and promo.end_date and promo.status==1:
+            # reload_page(url, interval)
+            start_dates = promo.start_date.astimezone(ph_timezone)
+            end_dates = promo.end_date.astimezone(ph_timezone)
+            start_date = start_dates - timedelta(hours=8)
+            end_date = end_dates - timedelta(hours=8)
+            current_date = timezone.localtime(timezone.now(), ph_timezone)
+            countr = 0
+            if start_date <= current_date <= end_date:
+                
+                for f in facilitys:
+                    f.title = promo.title
+                    f.description = promo.description
+                    f.status = promo.status
+                    f.rateperhour = promo.new_rate
+                    f.person_rateperhour = promo.person_new_rate
+                    f.num_pc = promo.num_pc
+                    f.num_attendies = promo.num_attendies
+                    f.save()
+                    # Update the promo to mark it as expired
+                    if promo.is_available == 0:
+                        promo.is_expired = False
+                        promo.status = True              
+                        promo.is_available = 1
+                        promo.save()
+                        notification = f"Promo has been set to {f.facilityname}."
+                        messages.success(request, notification)
+            if start_date <= current_date <= end_date:
+                return HttpResponse('<script>window.location.reload(true);</script>')
+
+
+
+
+            
+
+                
+    for main_rule in main_list:
+        for promo in promo_list:
+            if promo.start_date and promo.end_date:
+
+                # reload_page(url, interval)
+                start_dates = promo.start_date.astimezone(ph_timezone)
+                end_dates = promo.end_date.astimezone(ph_timezone)
+                start_date = start_dates - timedelta(hours=8)
+                end_date = end_dates - timedelta(hours=8)
+                current_date = timezone.localtime(timezone.now(), ph_timezone)
+
+                if not start_date <= current_date <= end_date:
+                    for f in facilitys:
+                        f.title = main_rule.title
+                        f.description = main_rule.description
+                        f.status = main_rule.status
+                        f.rateperhour = main_rule.rate
+                        f.person_rateperhour = main_rule.person_rate
+                        f.num_pc = main_rule.num_pc
+                        f.num_attendies = main_rule.num_attendies
+                        f.save()
+                        if end_date < current_date and promo.is_expired==0 and promo.is_available == 1:
+                            promo.is_available = 0
+                            promo.is_expired = True
+                            promo.save()
+                            
+                            notification = f"Promo has been ended to {f.facilityname}."
+                            messages.success(request, notification)
+
+
 
 
 # @csrf_protect
@@ -344,6 +488,7 @@ def event_click(request, event_id):
 def display_facility(request):
     # message = "try"
     # messages.info(request, message)
+    facility = Setting_Facility.objects.filter(isdeleted=0).order_by('id')
     if request.method == 'POST':
         # Handling POST requests
         
@@ -393,9 +538,9 @@ def display_facility(request):
                 # Updating an existing facility
                 facility = get_object_or_404(Facility, id=f_id)
                 facility.facilityname = nfacility
-                facility.area_id = narea_id
-                facility.rateperhour = nrateperhour
-                facility.person_rateperhour = nperson_rateperhour
+                # facility.area_id = narea_id
+                # facility.rateperhour = nrateperhour
+                # facility.person_rateperhour = nperson_rateperhour
                 facility.capacity = ncapacity
                 facility.save()
                 message = "Facility updated successfully"
@@ -584,26 +729,21 @@ def restoreFacility(request, id):
 @login_required
 @user_passes_test(is_superuser)
 def displayall_setting_facility(request):
+    facility_type = Facility_type.objects.all()
     firstname = request.session.get('firstname')
     setting_facility = Setting_Facility.objects.filter(isdeleted=0).order_by('id')
     nfacility = request.POST.get('facility')
+    nfacility_type = request.POST.get('facility_type')
     
 
     if request.method == 'POST':
-        forms = RulesFacilityForm(request.POST)
-        if forms.is_valid():
-            facility = forms.cleaned_data['facility']
-            if not Setting_Facility.objects.filter(facility=facility).exists():
-                forms.save()
-            else:
-                message = f" This facility already exist."
-                messages.warning(request, message)
+        setting_facility.update(facility_type=nfacility_type)
                 
 
     else:
         # Set the initial value of the 'facility' field in the form
         forms = RulesFacilityForm() 
-    return render(request, 'facility_table.html', {'setting_facility': setting_facility, 'forms': forms, 'firstname':firstname})
+    return render(request, 'facility_table.html', {'setting_facility': setting_facility,'firstname':firstname, 'facility_type':facility_type})
 
 
 @csrf_protect
@@ -914,7 +1054,7 @@ def facilitymainrules_set(request, id):
     facility = request.session.get('facility')
     newfacility = request.POST.get('facility', facility)
     title = request.POST.get('title',mainrules.title)
-    points = request.POST.get('points',mainrules.points)
+    # points = request.POST.get('points',mainrules.points)
     num_pc = request.POST.get('num_pc',mainrules.num_pc)
     num_attendies = request.POST.get('num_attendies',mainrules.num_attendies)
     description = request.POST.get('description', mainrules.description)
@@ -945,7 +1085,7 @@ def facilitymainrules_set(request, id):
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
-                new_Facility = Facility_MainRules_set(facility=newfacility, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
+                new_Facility = Facility_MainRules_set(facility=newfacility, title=title,  num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
                 new_Facility.save()
 
 
@@ -953,21 +1093,21 @@ def facilitymainrules_set(request, id):
     # elif Facility_MainRules_set.objects.filter(facility=facility).exists():
     #     if Facility_MainRules_set.objects.filter(status=0).exists():
     #         if not Facility_MainRules_set.objects.filter(title=title).exists():
-    #             new_Facility = Facility_MainRules_set(facility=facility, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
+    #             new_Facility = Facility_MainRules_set(facility=facility, title=title,  num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
     #             new_Facility.save()
     else:
         # Facility doesn't exist, check if title exists
         if Facility_MainRules_set.objects.filter(title=title).exists():
             # f" already exists"
-            new_Facility = Facility_MainRules_set(facility=newfacility, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
+            new_Facility = Facility_MainRules_set(facility=newfacility, title=title,  num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
             new_Facility.save()
 
         elif Facility_MainRules_set.objects.filter(status=0).exists():
-            new_Facility = Facility_MainRules_set(facility=newfacility, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
+            new_Facility = Facility_MainRules_set(facility=newfacility, title=title,  num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
             new_Facility.save()
         else:
             # Neither facility nor title exist
-            new_Facility = Facility_MainRules_set(facility=newfacility, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
+            new_Facility = Facility_MainRules_set(facility=newfacility, title=title,  num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, person_rate=person_rate, status=status)
             new_Facility.save()
 
     if faci_id is not None:
@@ -1057,6 +1197,7 @@ def facilitymainrules_set(request, id):
 def is_setfacilitymainrules_status(request):
     faci_id = request.session.get('faci_id')
     facility = request.session.get('facility')
+    facilitys = Facility.objects.get(pk=faci_id)
     current_date = timezone.now()
     # facilities = get_object_or_404(Facility, facilityname=facility)
     main_rules = Facility_MainRules_set.objects.filter(facility=facility).first()
@@ -1075,22 +1216,11 @@ def is_setfacilitymainrules_status(request):
     setting_list = Setting_Facility.objects.filter(facility=facility)
 
     
-
-    facility_promo_rules_set = Facility_PromoRules_set.objects.filter(facility=facility).first()
-
-    if facility_promo_rules_set and current_date > facility_promo_rules_set.end_date:
-        message = "Current date is past the end date of Facility Promo Rules."
-        messages.success(request, message)
         # print("Current date is on or before the end date of Facility Promo Rules, or no rules found.")
 
     # Check if subrule_list is not empty
     if mainrule_list.exists():
             mainrule = request.POST.get('mainrule', mainrule_list.first().id)
-            new_rate = main_rules.rate
-            person_rate = main_rules.person_rate
-            facility_list.rateperhour = new_rate
-            facility_list.person_rateperhour = person_rate
-            facility_list.save()
     else:
         mainrule = None 
 
@@ -1101,21 +1231,7 @@ def is_setfacilitymainrules_status(request):
 
     if promorule_list.exists():
         promorule = request.POST.get('promorule', promorule_list.first().id)
-        
-        end_date = promo_rules.end_date
 
-        if current_date < end_date:
-            facility_list.rateperhour = main_rules.rate
-            facility_list.person_rateperhour = main_rules.person_rate
-            facility_list.save()
-            message = "Current date is past the end date of Facility Promo Rules**********************."
-            messages.success(request, message)
-        else:
-            new_rate = promo_rules.new_rate
-            person_new_rate = promo_rules.person_new_rate
-            facility_list.rateperhour = new_rate
-            facility_list.person_rateperhour = person_new_rate
-            facility_list.save()
     else:
         promorule = None  # or set to an appropriate default value
 
@@ -1128,10 +1244,98 @@ def is_setfacilitymainrules_status(request):
     # Update the settings in a single call
     setting_list.update(mainrules=mainrule, subrules=subrule, promorules=promorule)
 
-    # mainrules.save()
-    message = f"Rules successfully set."
-
+    message = f"Rule has been set to {facilitys.facilityname}."
     messages.success(request, message)
+    # facility_id = request.session.get('facility')
+    # facilitys = Facility.objects.get(pk=facility_id)
+    # setting_list = Setting_Facility.objects.filter(facility=facility_id)
+    # promo_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+    # main_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+
+    # # Get the current UTC time
+    # utc_time = timezone.now()
+
+    # # Get the timezone object for 'Asia/Manila'
+    # ph_timezone = pytz.timezone('Asia/Manila')
+
+    # # Convert the UTC time to the 'Asia/Manila' timezone
+    # current_date = utc_time.astimezone(ph_timezone)
+    # current_dates = datetime.now().strftime('%a').upper()
+    # # ph_timezone = pytz.timezone('Asia/Manila')
+    
+
+    # mainrule_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+    # subrule_list = Facility_SubRules_set.objects.filter(facility=facility_id)
+    # promorule_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+    # subrules_list = Facility_SubRules_set.objects.filter(facility=facility_id)
+
+    # # Check if subrule_list is not empty
+    # if mainrule_list.exists():
+    #     mainrule = request.POST.get('mainrule', mainrule_list.first().id)
+    # if subrule_list.exists():
+    #     subrule = request.POST.get('subrule', subrule_list.first().id)
+    # else:
+    #     subrule = None 
+    # if promorule_list.exists():
+    #     promorule = request.POST.get('promorule', promorule_list.first().id)
+    # else:
+    #     promorule = None  
+
+
+
+    # for promo in promo_list:
+    #     if promo.start_date and promo.end_date:
+    #         start_dates = promo.start_date.astimezone(ph_timezone)
+    #         end_dates = promo.end_date.astimezone(ph_timezone)
+    #         start_date = start_dates - timedelta(hours=8)
+    #         end_date = end_dates - timedelta(hours=8)
+    #         current_date = timezone.localtime(timezone.now(), ph_timezone)
+
+    #         if start_date <= current_date <= end_date:
+    #             facilitys.title = promo.title
+    #             facilitys.description = promo.description
+    #             facilitys.status = promo.status
+    #             facilitys.rateperhour = promo.new_rate
+    #             facilitys.person_rateperhour = promo.person_new_rate
+    #             facilitys.num_pc = promo.num_pc
+    #             facilitys.num_attendies = promo.num_attendies
+    #             facilitys.save()
+    #             message = f"Promo has been set to {facilitys.facilityname}."
+    #             messages.success(request, message)
+    #             # Update the promo to mark it as expired
+    #             promo.is_expired = False
+    #             promo.status = True
+    #             promo.save()
+
+                
+    # for main_rule in main_list:
+    #     for promo in promo_list:
+    #         if promo.start_date and promo.end_date:
+    #             start_dates = promo.start_date.astimezone(ph_timezone)
+    #             end_dates = promo.end_date.astimezone(ph_timezone)
+    #             start_date = start_dates - timedelta(hours=8)
+    #             end_date = end_dates - timedelta(hours=8)
+    #             current_date = timezone.localtime(timezone.now(), ph_timezone)
+
+    #             if not start_date <= current_date <= end_date:
+    #                 facilitys.title = main_rule.title
+    #                 facilitys.description = main_rule.description
+    #                 facilitys.status = main_rule.status
+    #                 facilitys.rateperhour = main_rule.rate
+    #                 facilitys.person_rateperhour = main_rule.person_rate
+    #                 facilitys.num_pc = main_rule.num_pc
+    #                 facilitys.num_attendies = main_rule.num_attendies
+    #                 facilitys.save()
+    #                 promo.is_expired = True
+    #                 promo.status = False
+    #                 promo.save()
+    #                 # message = f"{current_dates} Main rule has been set to {current_date} end date:{end_date}."
+    #                 message = f"Rule has been set to {facilitys.facilityname}."
+    #                 messages.success(request, message)
+
+    # subrules_list.update(status=1)
+    # setting_list.update(mainrules=mainrule,subrules=subrule,promorules=promorule)
+    
 
     if faci_id is not None:
         return HttpResponseRedirect(reverse('facility:facilityRules', args=[faci_id]))
@@ -1245,7 +1449,8 @@ def display_facility_subrules(request, id):
 def is_setfacilitysubrules_status(request):
     faci_id = request.session.get('faci_id')
     facility = request.session.get('facility')
-
+    facilitys = Facility.objects.get(pk=faci_id)
+    current_date = timezone.now()
     # facilities = get_object_or_404(Facility, facilityname=facility)
     main_rules = Facility_MainRules_set.objects.filter(facility=facility).first()
     promo_rules = Facility_PromoRules_set.objects.filter(facility=facility).first()
@@ -1263,14 +1468,11 @@ def is_setfacilitysubrules_status(request):
     setting_list = Setting_Facility.objects.filter(facility=facility)
 
     
+        # print("Current date is on or before the end date of Facility Promo Rules, or no rules found.")
 
-    
     # Check if subrule_list is not empty
     if mainrule_list.exists():
             mainrule = request.POST.get('mainrule', mainrule_list.first().id)
-            new_rate = main_rules.rate
-            facility_list.rateperhour = new_rate
-            facility_list.save()
     else:
         mainrule = None 
 
@@ -1281,9 +1483,7 @@ def is_setfacilitysubrules_status(request):
 
     if promorule_list.exists():
         promorule = request.POST.get('promorule', promorule_list.first().id)
-        new_rate = promo_rules.new_rate
-        facility_list.rateperhour = new_rate
-        facility_list.save()
+
     else:
         promorule = None  # or set to an appropriate default value
 
@@ -1296,11 +1496,8 @@ def is_setfacilitysubrules_status(request):
     # Update the settings in a single call
     setting_list.update(mainrules=mainrule, subrules=subrule, promorules=promorule)
 
-    # mainrules.save()
-    message = f"Rules successfully set."
-
+    message = f"Rule has been set to {facilitys.facilityname}."
     messages.success(request, message)
-
     if faci_id is not None:
         return HttpResponseRedirect(reverse('facility:facilitysubrules', args=[faci_id]))
     else:
@@ -1426,7 +1623,8 @@ def display_facility_promorules(request, id):
 def is_setfacilitypromorules_status(request):
     faci_id = request.session.get('faci_id')
     facility = request.session.get('facility')
-    
+    facilitys = Facility.objects.get(pk=faci_id)
+    current_date = timezone.now()
     # facilities = get_object_or_404(Facility, facilityname=facility)
     main_rules = Facility_MainRules_set.objects.filter(facility=facility).first()
     promo_rules = Facility_PromoRules_set.objects.filter(facility=facility).first()
@@ -1444,24 +1642,11 @@ def is_setfacilitypromorules_status(request):
     setting_list = Setting_Facility.objects.filter(facility=facility)
 
     
-
-    
-    # # Check if subrule_list is not empty
-    # facility_promo_rules_set = Facility_PromoRules_set.objects.filter(facility=facility).first()
-
-    # if facility_promo_rules_set and current_date > facility_promo_rules_set.end_date:
-    #     message = "Current date is past the end date of Facility Promo Rules."
-    #     messages.success(request, message)
         # print("Current date is on or before the end date of Facility Promo Rules, or no rules found.")
 
     # Check if subrule_list is not empty
     if mainrule_list.exists():
             mainrule = request.POST.get('mainrule', mainrule_list.first().id)
-            new_rate = main_rules.rate
-            person_rate = main_rules.person_rate
-            facility_list.rateperhour = new_rate
-            facility_list.person_rateperhour = person_rate
-            facility_list.save()
     else:
         mainrule = None 
 
@@ -1472,26 +1657,9 @@ def is_setfacilitypromorules_status(request):
 
     if promorule_list.exists():
         promorule = request.POST.get('promorule', promorule_list.first().id)
-        
-        end_date = promo_rules.end_date
-        current_date = datetime.now()
 
-        current_date_aware = timezone.make_aware(current_date, timezone=timezone.utc)
-
-        if current_date_aware < end_date:
-            facility_list.rateperhour = main_rules.rate
-            facility_list.person_rateperhour = main_rules.person_rate
-            facility_list.save()
-            message = "Current date is past the end date of Facility Promo Rules**********************."
-            messages.success(request, message)
-        else:
-            new_rate = promo_rules.new_rate
-            person_new_rate = promo_rules.person_new_rate
-            facility_list.rateperhour = new_rate
-            facility_list.person_rateperhour = person_new_rate
-            facility_list.save()
     else:
-        promorule = None  # or set to an appropriate default value# or set to an appropriate default value
+        promorule = None  # or set to an appropriate default value
 
     # Update the status for all matching instances
 
@@ -1502,11 +1670,8 @@ def is_setfacilitypromorules_status(request):
     # Update the settings in a single call
     setting_list.update(mainrules=mainrule, subrules=subrule, promorules=promorule)
 
-    # mainrules.save()
-    message = f"Rules successfully set."
-
-    messages.success(request, message)
-
+    message = f"Rule has been set to {facilitys.facilityname}."
+    messages.success(request, message)    
     if faci_id is not None:
         return HttpResponseRedirect(reverse('facility:facilitypromorules', args=[faci_id]))
     else:
@@ -1560,7 +1725,18 @@ def facilitypromorules_set(request, id):
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:              
-                new_Facility = Facility_PromoRules_set(facility=newfacility, title=title, description=description, new_rate=new_rate, person_new_rate=person_new_rate, start_date=start_date, end_date=end_date, num_attendies=num_attendies, status=status, num_pc=num_pc)
+                new_Facility = Facility_PromoRules_set(
+                    facility=newfacility,
+                    title=title,
+                    description=description,
+                    new_rate=new_rate,
+                    person_new_rate=person_new_rate,
+                    start_date=start_date,
+                    end_date=end_date,
+                    num_attendies=num_attendies,
+                    status=status,
+                    num_pc=num_pc,
+                )
                 new_Facility.save()
 
 
@@ -1568,16 +1744,51 @@ def facilitypromorules_set(request, id):
     else:
         # Facility doesn't exist, check if title exists
         if Facility_PromoRules_set.objects.filter(title=title).exists():
-            new_Facility = Facility_PromoRules_set(facility=newfacility, title=title, description=description, new_rate=new_rate, person_new_rate=person_new_rate, start_date=start_date, end_date=end_date, num_attendies=num_attendies, status=status, num_pc=num_pc)
+                    
+            new_Facility = Facility_PromoRules_set(
+                facility=newfacility,
+                title=title,
+                description=description,
+                new_rate=new_rate,
+                person_new_rate=person_new_rate,
+                start_date=start_date,
+                end_date=end_date,
+                num_attendies=num_attendies,
+                status=status,
+                num_pc=num_pc,
+            )
             new_Facility.save()
 
         elif Facility_PromoRules_set.objects.filter(status=0).exists():
-            new_Facility = Facility_PromoRules_set(facility=newfacility, title=title, description=description, new_rate=new_rate, person_new_rate=person_new_rate, start_date=start_date, end_date=end_date, num_attendies=num_attendies, status=status, num_pc=num_pc)
+                    
+            new_Facility = Facility_PromoRules_set(
+                facility=newfacility,
+                title=title,
+                description=description,
+                new_rate=new_rate,
+                person_new_rate=person_new_rate,
+                start_date=start_date,
+                end_date=end_date,
+                num_attendies=num_attendies,
+                status=status,
+                num_pc=num_pc,
+            )
             new_Facility.save() 
-            
+                        
         else:
-            # Neither facility nor title exist
-            new_Facility = Facility_PromoRules_set(facility=newfacility, title=title, description=description, new_rate=new_rate, person_new_rate=person_new_rate, start_date=start_date, end_date=end_date, num_attendies=num_attendies, status=status, num_pc=num_pc)
+            # Neither facility nor title exist   
+            new_Facility = Facility_PromoRules_set(
+                facility=newfacility,
+                title=title,
+                description=description,
+                new_rate=new_rate,
+                person_new_rate=person_new_rate,
+                start_date=start_date,
+                end_date=end_date,
+                num_attendies=num_attendies,
+                status=status,
+                num_pc=num_pc,
+            )
             new_Facility.save()
 
     if faci_id is not None:
@@ -2104,6 +2315,48 @@ def display_calendar(request):
     return render(request, template, {'calform': calform, 'event': event, 'facility': facility, 'typesched': typesched, 'firstname':firstname, 'stypes_ched':stypes_ched})
 
 
+
+# def promo_control(request):
+#     facility_id = request.session.get('facility')
+#     facility = Facility.objects.get(pk=facility_id)
+#     promo_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+#     main_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+#     current_date = timezone.now()
+    
+#     for promo in promo_list:
+#         if not promo.start_date <= current_date <= promo.end_date and promo.status == 1:
+#             facility.title = promo.title
+#             facility.description = promo.description
+#             facility.status = promo.status
+#             facility.rateperhour = promo.new_rate
+#             facility.person_rateperhour = promo.person_new_rate
+#             facility.num_pc = promo.num_pc
+#             facility.num_attendies = promo.num_attendies
+#             facility.save()
+#             message = f"Promo has been set to {facility.facilityname}."
+#             messages.success(request, message)
+#             return
+#         elif main_rule.start_date <= current_date <= main_rule.end_date and main_rule.status == 1:
+#             for main_rule in main_list:
+#                 facility.title = main_rule.title
+#                 facility.description = main_rule.description
+#                 facility.status = main_rule.status
+#                 facility.rateperhour = main_rule.new_rate
+#                 facility.person_rateperhour = main_rule.person_new_rate
+#                 facility.num_pc = main_rule.num_pc
+#                 facility.num_attendies = main_rule.num_attendies
+#                 facility.save()
+#                 promo.is_expired = True
+#                 promo.status = 0
+#                 promo.save()
+#                 message = f"Promo has been set to {facility.facilityname}."
+#                 messages.success(request, message)
+#                 return
+#         else:
+#             pass
+
+
+
 @csrf_protect
 @login_required
 @user_passes_test(is_superuser)
@@ -2508,15 +2761,9 @@ def display_usertype_promorules(request, id):
     upromorules = UserType_PromoRules_set.objects.filter(user_type=suser.user_type_id).order_by('-modified_at')
     
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        new_rate = request.POST['new_rate']
-        start_date = request.POST['start_date']
-        end_date = request.POST['end_date']
-        capacity = request.POST['capacity']
-
-        new_promorules = UserType_PromoRules(title=title,description=description,new_rate=new_rate,start_date=start_date,end_date=end_date,capacity=capacity)
-        new_promorules.save()
+        mform = UserTypePromoRulesForm(request.POST)
+        if mform.is_valid():
+            mform.save()
             
     else:
         # Set the initial value of the 'facility' field in the form
@@ -2527,7 +2774,8 @@ def display_usertype_promorules(request, id):
         'umainrules': umainrules,
         'usubrules': usubrules,
         'upromorules': upromorules,
-        'firstname':firstname
+        'firstname':firstname,
+        'mform':mform
     })
 
 @login_required
@@ -2779,3 +3027,64 @@ def set_user_session(request, user_id):
     # Set the 'facility_id' session variable to the clicked facility's ID
     request.session['user_id'] = user_id
     return redirect('facility:listofuser') 
+
+
+# import schedule
+# import time
+# def apply_promo_and_main_rules(request):
+#     facility_id = request.session.get('facility')
+#     facilitys = Facility.objects.get(pk=facility_id)
+#     promo_list = Facility_PromoRules_set.objects.filter(facility=facility_id)
+#     main_list = Facility_MainRules_set.objects.filter(facility=facility_id)
+
+#     utc_time = timezone.now()
+#     ph_timezone = pytz.timezone('Asia/Manila')
+#     current_date = utc_time.astimezone(ph_timezone)
+#     current_day = current_date.strftime('%a').upper()
+
+#     for promo in promo_list:
+#         if promo.start_date and promo.end_date:
+#             start_dates = promo.start_date.astimezone(ph_timezone) - timedelta(hours=8)
+#             end_dates = promo.end_date.astimezone(ph_timezone) - timedelta(hours=8)
+
+#             if start_dates <= current_date <= end_dates:
+#                 facilitys.title = promo.title
+#                 facilitys.description = promo.description
+#                 facilitys.status = promo.status
+#                 facilitys.rateperhour = promo.new_rate
+#                 facilitys.person_rateperhour = promo.person_new_rate
+#                 facilitys.num_pc = promo.num_pc
+#                 facilitys.num_attendies = promo.num_attendies
+#                 facilitys.save()
+#                 message = f"Promo has been set to {facilitys.facilityname}."
+#                 messages.success(request, message)
+
+#                 # Update the promo to mark it as expired
+#                 promo.is_expired = True
+#                 promo.status = False
+#                 promo.save()
+
+#     for main_rule in main_list:
+#         if main_rule.start_date and main_rule.end_date:
+#             start_dates = main_rule.start_date.astimezone(ph_timezone) - timedelta(hours=8)
+#             end_dates = main_rule.end_date.astimezone(ph_timezone) - timedelta(hours=8)
+
+#             if not start_dates <= current_date <= end_dates:
+#                 facilitys.title = main_rule.title
+#                 facilitys.description = main_rule.description
+#                 facilitys.status = main_rule.status
+#                 facilitys.rateperhour = main_rule.rate
+#                 facilitys.person_rateperhour = main_rule.person_rate
+#                 facilitys.num_pc = main_rule.num_pc
+#                 facilitys.num_attendies = main_rule.num_attendies
+#                 facilitys.save()
+#                 message = f"{current_day} Main rule has been set to {current_date} end date:{end_dates}."
+#                 messages.success(request, message)
+
+#     print("Applying promo and main rules...")
+
+# schedule.every(30).minutes.do(apply_promo_and_main_rules)
+
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)

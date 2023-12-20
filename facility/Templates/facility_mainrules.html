@@ -102,9 +102,9 @@
         </tbody>
         </table><br>
     </card>
-        <button class="setbtn"  type="button"  data-bs-target="#staticBackdrop">
+        <button class="setbtn"  style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"   data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->
-          <a class="set" href="{% url 'facility:setfmstatus_one' %}">Set</a>
+          <a href="{% url 'facility:setfmstatus_one' %}">Set</a>
           </button>
           <div class="vline"></div>
           <div class="menurules" style="border: 1px solid #DCDCDC;">
@@ -118,14 +118,14 @@
           <button type="submit" class="btnaddrules" style="margin-left: 70%; position: relative; top: 3rem; z-index: 2;"><a href="{% url 'facility:setfmstatus' f.id %}">Add</a></button>
           <!-- <button class="btneditrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="#">Edit</a></button> -->
           <button class="btndelrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;" data-bs-toggle="modal" data-bs-target="#warning-{{ f.id}}" data-facility-mainrule-title="{{ f.title }}"  data-facility-mainrules-id="{{ f.id }}">Delete</button> 
-            <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
+          <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
               
               <h3 class="titletxt">{{ f.title }}
               </h3><br>
               <div class="hline"></div>
               
               <section style="margin:10px; font-size: 14px;  height: 400px;">
-              <ul style="width: fit-content; height: 100px; overflow-y: auto;">
+                <ul style="width: fit-content; ">
                 <li>Number of Computers: {{ f.num_pc }}</li>
                 
                 <li>Number of Attendies: {{ f.num_attendies }}</li>

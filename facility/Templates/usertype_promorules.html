@@ -32,17 +32,15 @@
         </div>
         <div class="modal-body">
           <label class="modalpopup">Title</label><br>
-          <input type="text" name="title" aria-valuetext='{{mform.title}}'><br>
-          <label class="modalpopup">Capacity</label><br>
-          <input type="number" name="capacity" aria-valuetext='{{mform.capacity}}'><br>
+          {{mform.title}}
+          <label class="modalpopup">Advance Booking</label><br>
+          {{mform.adv_booking}}
+          <label class="modalpopup">Limit Booking</label><br>
+          {{mform.lim_booking}}
+          <label class="modalpopup">Cancellation Fee</label><br>
+          {{mform.cancel_fee}}
           <label class="modalpopup">Description</label><br>
-          <textarea placeholder="Input Description" name="description" aria-valuetext='{{mform.description}}'></textarea>   
-          <label class="modalpopup">New Rate</label><br>
-          <input type="number" name="new_rate" aria-valuetext='{{mform.new_rate}}'><br>
-          <label class="modalpopup">Start Date</label><br>
-          <input type="datetime-local" name="start_date" aria-valuetext='{{mform.start_date}}'><br>
-          <label class="modalpopup">End Date</label><br>
-          <input type="datetime-local" name="end_date" aria-valuetext='{{mform.end_date}}'><br>
+          <textarea placeholder="Input Description" name="description" aria-valuetext='{{mform.description}}'></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

@@ -34,17 +34,14 @@
         <div class="modal-body">
           <label class="modalpopup">Title</label><br>
           {{mform.title}}
-          <label class="modalpopup">Points</label><br>
-          {{mform.points}}
-          <label class="modalpopup">Number of Computer/s</label><br>
-          {{mform.num_pc}}
-          <label class="modalpopup">Number of Attendies</label><br>
-          {{mform.num_attendies}}
+          <label class="modalpopup">Advance Booking</label><br>
+          {{mform.adv_booking}}
+          <label class="modalpopup">Limit Booking</label><br>
+          {{mform.lim_booking}}
+          <label class="modalpopup">Cancellation Fee</label><br>
+          {{mform.cancel_fee}}
           <label class="modalpopup">Description</label><br>
           <textarea placeholder="Input Description" name="description" aria-valuetext='{{mform.description}}'></textarea>
-          <label class="modalpopup">Rate</label><br>
-          {{mform.rate}}
-         
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -126,14 +123,31 @@
               
               <h3 class="titletxt">{{ u.title }}</h3><br>
               <div class="hline"></div>
+              <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">
+                {% for u in addedpromorules %} 
+                <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setupstatus' u.id %}">Add</a></button>
+                <!-- <button class="btneditrules"style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:updateupromorules' u.id %}">Edit</a></button> -->
+                <button class="btndelrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;" data-bs-toggle="modal" data-bs-target="#warning-{{ u.id}}" data-usertype-mainrule-title="{{ u.title }}"  data-usertype-mainrules-id="{{ u.id }}">Delete</button>  
+                <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
               
+                  <h3 class="titletxt">{{ u.title }}</h3><br>
+                  <div class="hline"></div>
+                  
+                  <section style="margin:10px; font-size: 14px;  height: 400px;">
+                  <ul style="width: fit-content; ">
+                    <li>Description: {{ u.description }}</li>
+                  </ul>
+                  <br>
+                  <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div>
+                </section>
+                </div>
+                  {% empty %}
+                  <h3 style="opacity: 0.3;">No Available Rules</h3>
+                  {% endfor %}
+                </div>
               <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">
               <ul style="width: fit-content; ">
-                <li>Number of Computers: {{ f.num_pc }}</li>
-                
-                <li>Number of Attendies: {{ f.num_attendies }}</li>
-                <li>Description: {{ u.description }}</li>
-                <li>Rate: {{ f.rate }}</li>
+
               </ul>
               
               <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div>
