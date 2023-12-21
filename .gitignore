@@ -91,3 +91,10 @@ wiladmin/migrations/__pycache__/0003_rename_date_logs_datetime.cpython-310.pyc
 api/models/__pycache__/BookingModel.cpython-311.pyc
 polls/__pycache__/views.cpython-311.pyc
 polls/__pycache__/views.cpython-311.pyc
+wallet/__pycache__
+walletAPI/__pycache__
+facility/__pycache__
+api/migrations/__pycache__
+walletAPI/migrations/__pycache__
+api/migrations/__pycache__
+
