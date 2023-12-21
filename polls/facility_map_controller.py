@@ -6,6 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from polls.models import AssignedArea
 from wiladmin.models import WalkinBookingModel
+from wallet.models import UserProfileInfo
+from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse, JsonResponse
 
 class FacilityMapController:
     @csrf_exempt

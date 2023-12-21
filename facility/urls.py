@@ -4,8 +4,9 @@ from django.urls import path
 # from .views import put
 app_name ='facility'
 
-urlpatterns =[
+urlpatterns =[ 
     path('get-facility/', views.get_facility, name='get_facility'),
+    path('get-usertype/', views.get_usertype_rules, name='get_usertype'),
     path('facilitymanagement', views.display_facility, name='facility'),
     path('facilitymanagement/updatefaci', views.display_facility, name='updatefaci'),
     path('rules', views.rules_facility, name='rules'),

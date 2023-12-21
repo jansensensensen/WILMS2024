@@ -13,7 +13,7 @@ from django.shortcuts import render
 import plotly.express as px
 from plotly.offline import plot
 import plotly.graph_objs as go
-from .forms import ChartTypeForm, RulesUserTypeForm, UserTypeForm, UserForm
+from .forms import ChartTypeForm, RulesUserTypeForm, UserTypeForm, UserForm, UserTypeMainRulesForm, UserTypeRulesForm
 import json
 from matplotlib import pyplot as plt
 from reportlab.pdfgen import canvas
@@ -22,7 +22,7 @@ from decimal import Decimal
 from io import BytesIO
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from .forms import CalendarEventForm, FacilityForm, FacilityMainRulesForm, FacilityPromoRulesForm, FacilitySubRulesForm, FacilityUpdateForm, Revenue_TransactionForm, RulesFacilityForm, Sched_TypeForm, TransactionForm
-from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Setting_Facility, Setting_UserType, Transaction, User
+from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Setting_Facility, Setting_UserType, Transaction, User, UserType_Rules
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import View
@@ -37,7 +37,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from django.db.models import Count, Sum
 from django.http import HttpResponse, HttpResponseRedirect
-from .forms import FacilityForm, FacilityMainRulesForm, FacilityMainRulesSetForm, FacilityPromoRulesForm, FacilitySubRulesForm, FacilityUpdateForm, UserTypeMainRulesForm, UserTypePromoRulesForm, UserTypeSubRulesForm
+from .forms import FacilityForm, FacilityMainRulesForm, FacilityMainRulesSetForm, FacilityPromoRulesForm, FacilitySubRulesForm, FacilityUpdateForm, UserTypePromoRulesForm, UserTypeSubRulesForm
 from .models import Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Setting_Facility, Setting_UserType, UserType_MainRules, UserType_MainRules_set, UserType_PromoRules, UserType_PromoRules_set, UserType_SubRules, UserType_SubRules_set, Sched_Type
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib import colors
@@ -195,6 +195,82 @@ def apply_promo_and_main_rules(request):
                             notification = f"Promo has been ended to {f.facilityname}."
                             messages.success(request, notification)
 
+def user_apply_promo_and_main_rules(request):
+    user_type = request.session.get('user_type')
+    usertype = UserType_Rules.objects.filter(pk=user_type)
+    promo_list = UserType_PromoRules_set.objects.filter(user_type=user_type)
+    main_list = UserType_MainRules_set.objects.filter(user_type=user_type)
+    utc_time = timezone.now()
+    ph_timezone = pytz.timezone('Asia/Manila')
+    current_date = utc_time.astimezone(ph_timezone)
+    current_dates = datetime.now().strftime('%a').upper()
+
+    for promo in promo_list:
+        
+        if promo.start_date and promo.end_date and promo.status==1:
+            # reload_page(url, interval)
+            start_dates = promo.start_date.astimezone(ph_timezone)
+            end_dates = promo.end_date.astimezone(ph_timezone)
+            start_date = start_dates - timedelta(hours=8)
+            end_date = end_dates - timedelta(hours=8)
+            current_date = timezone.localtime(timezone.now(), ph_timezone)
+            countr = 0
+            if start_date <= current_date <= end_date:
+                
+                for usert in usertype:
+                    usert.title = promo.title
+                    usert.description = promo.description
+                    usert.status = promo.status
+                    usert.adv_booking = promo.adv_booking
+                    usert.lim_booking = promo.lim_booking
+                    usert.cancel_fee = promo.cancel_fee
+                    # usert.num_attendies = promo.num_attendies
+                    usert.save()
+                    # Update the promo to mark it as expired
+                    if promo.is_available == 0:
+                        promo.is_expired = False
+                        promo.status = True              
+                        promo.is_available = 1
+                        promo.save()
+                        notification = f"Promo has been set to {usert.user_type}."
+                        messages.success(request, notification)
+            if start_date <= current_date <= end_date:
+                return HttpResponse('<script>window.location.reload(true);</script>')
+
+
+
+
+            
+
+                
+    for main_rule in main_list:
+        for promo in promo_list:
+            if promo.start_date and promo.end_date:
+
+                # reload_page(url, interval)
+                start_dates = promo.start_date.astimezone(ph_timezone)
+                end_dates = promo.end_date.astimezone(ph_timezone)
+                start_date = start_dates - timedelta(hours=8)
+                end_date = end_dates - timedelta(hours=8)
+                current_date = timezone.localtime(timezone.now(), ph_timezone)
+
+                if not start_date <= current_date <= end_date:
+                    for usert in usertype:
+                        usert.title = main_rule.title
+                        usert.description = main_rule.description
+                        usert.status = main_rule.status
+                        usert.adv_booking = main_rule.adv_booking
+                        usert.lim_booking = main_rule.lim_booking
+                        usert.cancel_fee = main_rule.cancel_fee
+                        usert.save()
+                        if end_date < current_date and promo.is_expired==0 and promo.is_available == 1:
+                            promo.is_available = 0
+                            promo.is_expired = True
+                            promo.save()
+                            
+                            notification = f"Promo has been ended to {usert.user_type}."
+                            messages.success(request, notification)
+
 
 
 
@@ -202,72 +278,42 @@ def apply_promo_and_main_rules(request):
 # @login_required
 # @user_passes_test(is_superuser)
 def get_facility(request):
-    setting_facilities = Setting_Facility.objects.all()
+    facilities = Facility.objects.all()
 
     facility_data = []
-    for facility in setting_facilities:
-        mainrules = Facility_MainRules_set.objects.all()
-        subrules = Facility_SubRules_set.objects.all()
-        promorules = Facility_PromoRules_set.objects.all()
-
+    for facility in facilities:
         facility_dict = {
-            'setting_facility_id': facility.id,
-            'facility': {
-                'facility_id': facility.facility.id if facility.facility else None,
-                'facility_name': facility.facility.facilityname if facility.facility else None,
-                'rate_per_hour': facility.facility.rateperhour if facility.facility else None,
-                'capacity': facility.facility.capacity if facility.facility else None,
-                'created_at': facility.facility.created_at if facility.facility else None,
-                'modified_at': facility.facility.modified_at if facility.facility else None,
-                # Add other fields from Facility model
-            },
-            'main_rules': {
-                'mainrules': facility.mainrules.id if facility.mainrules else None,
-                'facility': facility.mainrules.facility if facility.mainrules else None,
-                'title': facility.mainrules.title if facility.mainrules else None, 
-                'points': facility.mainrules.points if facility.mainrules else None, 
-                'num_pc': facility.mainrules.num_pc if facility.mainrules else None, 
-                'num_attendies': facility.mainrules.num_attendies if facility.mainrules else None, 
-                'description': facility.mainrules.description if facility.mainrules else None, 
-                'rate': facility.mainrules.rate if facility.mainrules else None, 
-                'status': facility.mainrules.status if facility.mainrules else None, 
-                'created_at': facility.mainrules.created_at if facility.mainrules else None, 
-                'modified_at': facility.mainrules.modified_at if facility.mainrules else None, 
-                # Add other fields from Facility_MainRules_set model
-            },
-            'promo_rules': {
-                'promrules': facility.promorules.id if facility.promorules else None,
-                'facility': facility.promorules.facility if facility.promorules else None,
-                'title': facility.promorules.title if facility.promorules else None,
-                'new_rate': facility.promorules.new_rate if facility.promorules else None,
-                'start_date': facility.promorules.start_date if facility.promorules else None,
-                'end_date': facility.promorules.end_date if facility.promorules else None,
-                'capacity': facility.promorules.capacity if facility.promorules else None,
-                'description': facility.promorules.description if facility.promorules else None,
-                'status': facility.promorules.status if facility.promorules else None,
-                'created_at': facility.promorules.created_at if facility.promorules else None,
-                'modified_at': facility.promorules.modified_at if facility.promorules else None,
-                # Add other fields from Facility_PromoRules_set model
-            },
-            'sub_rules': {
-                'subrules': facility.subrules.id if facility.subrules else None, 
-                'facility': facility.subrules.facility if facility.subrules else None, 
-                'title': facility.subrules.title if facility.subrules else None,
-                'description': facility.subrules.description if facility.subrules else None,
-                'status': facility.subrules.status if facility.subrules else None,
-                'created_at': facility.subrules.created_at if facility.subrules else None,
-                'modified_at': facility.subrules.modified_at if facility.subrules else None,
-                # Add other fields from Facility_SubRules_set model
-            },
-            'created_at': facility.created_at,
-            'modified_at': facility.modified_at,
-            # Add other fields from Setting_Facility model if needed
+            'facility_id': facility.id,
+            'facility_name': facility.facilityname,
+            'rate_per_hour': facility.rateperhour,
+            'capacity': facility.capacity,
+            'person_rateperhour': facility.person_rateperhour,
+            'num_pc': facility.num_pc,
+            'num_attendees': facility.num_attendies,
+            # Add other fields from Facility model as needed
         }
         facility_data.append(facility_dict)
 
     return JsonResponse(facility_data, safe=False)
 
+def get_usertype_rules(request):
+    user_type_rules = UserType_Rules.objects.all()
 
+    rules_data = []
+    for rule in user_type_rules:
+        rule_dict = {
+            'user_type': rule.user_type,
+            'title': rule.title,
+            'description': rule.description,
+            'status': rule.status,
+            'adv_booking': rule.adv_booking,
+            'lim_booking': rule.lim_booking,
+            'cancel_fee': rule.cancel_fee,
+            # Add other fields from UserType_Rules model as needed
+        }
+        rules_data.append(rule_dict)
+
+    return JsonResponse(rules_data, safe=False)
 
 def generate_pdf_content(facility_stats, revenue_trans):
     buffer = io.BytesIO()
@@ -731,19 +777,21 @@ def restoreFacility(request, id):
 def displayall_setting_facility(request):
     facility_type = Facility_type.objects.all()
     firstname = request.session.get('firstname')
-    setting_facility = Setting_Facility.objects.filter(isdeleted=0).order_by('id')
     nfacility = request.POST.get('facility')
     nfacility_type = request.POST.get('facility_type')
-    
+    setting_facility = Setting_Facility.objects.filter(isdeleted=0).order_by('id')
+    form = FacilityPromoRulesForm(request.POST)
 
     if request.method == 'POST':
         setting_facility.update(facility_type=nfacility_type)
-                
+        # if form.is_valid():
+            
+        #     form.save()
 
     else:
         # Set the initial value of the 'facility' field in the form
-        forms = RulesFacilityForm() 
-    return render(request, 'facility_table.html', {'setting_facility': setting_facility,'firstname':firstname, 'facility_type':facility_type})
+        form = RulesFacilityForm() 
+    return render(request, 'facility_table.html', {'setting_facility': setting_facility,'firstname':firstname, 'facility_type':facility_type, 'form':form})
 
 
 @csrf_protect
@@ -833,6 +881,23 @@ def is_capacity_within_limit(capacity):
 #         # Set the initial value of the 'facility' field in the form
 #         forms = TransactionForm()  
 
+from .forms import UserTypeRulesForm  # Import the form
+
+# def usertype_create(request):
+#     template = 'usertype_table.html'
+#     firstname = request.session.get('firstname')
+     
+#     if request.method == 'POST':
+#         user_typers = UserTypeRulesForm(request.POST)
+#         if user_typers.is_valid():
+#             user_typers.save()
+#     else:
+#         user_typers = UserTypeRulesForm()  # Create an instance of the form
+
+#     return render(request, template, {'user_typers': user_typers, 'firstname': firstname})
+
+
+
 @csrf_protect
 @login_required
 @user_passes_test(is_superuser)
@@ -842,17 +907,21 @@ def user_create(request):
     user_list = User.objects.all().order_by('-id')
 
     if request.method == 'POST':
-        user_type = UserTypeForm(request.POST)
+        # user_type = UserTypeRulesForm(request.POST)
         user = UserForm(request.POST)
-        if user_type.is_valid():
-            user_type.save()
+        # if user_type.is_valid():
+        #    user_type.save()
+            # Setting_UserType.objects.create(user_type=new_usertype)
+            # Setting_Facility.objects.create(facility=new_facility)
+        
+
         if user.is_valid():
             user.save()
     else:
-        user_type = UserTypeForm()
+        user_type = UserTypeRulesForm()
         user = UserForm()
 
-    return render(request, template,{'user':user,'user_type':user_type, 'user_list':user_list, 'firstname':firstname})
+    return render(request, template,{'user':user, 'user_list':user_list, 'firstname':firstname})
 
 @csrf_protect
 @login_required
@@ -1212,7 +1281,7 @@ def is_setfacilitymainrules_status(request):
     mainrules_list = Facility_MainRules_set.objects.filter(facility=facility)
     subrules_list = Facility_SubRules_set.objects.filter(facility=facility)
     promorules_list = Facility_PromoRules_set.objects.filter(facility=facility)
-
+    mainrule_list = Facility_MainRules_set.objects.filter(facility=facility)
     setting_list = Setting_Facility.objects.filter(facility=facility)
 
     
@@ -1243,6 +1312,19 @@ def is_setfacilitymainrules_status(request):
 
     # Update the settings in a single call
     setting_list.update(mainrules=mainrule, subrules=subrule, promorules=promorule)
+
+    for main in mainrule_list:
+        facilitys.title = main.title
+        facilitys.description = main.description
+        facilitys.status = main.status
+        facilitys.rateperhour = main.rate
+        facilitys.person_rateperhour = main.person_rate
+        facilitys.num_pc = main.num_pc
+        facilitys.num_attendies = main.num_attendies
+        facilitys.save()
+
+
+
 
     message = f"Rule has been set to {facilitys.facilityname}."
     messages.success(request, message)
@@ -2455,6 +2537,7 @@ def transaction(request):
 def display_usertype_mainrules(request, id):
     firstname = request.session.get('firstname')
     suser = get_object_or_404(Setting_UserType, pk=id)
+    # request.session['userytpe'] = suser.user_type
     request.session['user_type_id'] = suser.pk
     request.session['user_type'] = suser.user_type_id
     template = 'usertype_mainrules.html'
@@ -2492,11 +2575,10 @@ def usertypemainrules_set(request, id):
     user_type = request.session.get('user_type')
     newuser = request.POST.get('user_type', user_type)
     title = request.POST.get('title',mainrules.title)
-    points = request.POST.get('points',mainrules.points)
-    num_pc = request.POST.get('num_pc',mainrules.num_pc)
-    num_attendies = request.POST.get('num_attendies',mainrules.num_attendies)
+    adv_booking = request.POST.get('adv_booking',mainrules.adv_booking)
+    lim_booking = request.POST.get('lim_booking',mainrules.lim_booking)
+    cancel_fee = request.POST.get('cancel_fee',mainrules.cancel_fee)
     description = request.POST.get('description', mainrules.description)
-    rate = request.POST.get('rate', mainrules.rate)
     status = 0
     # new_Facility = Facility_MainRules_set(facility=newfacility, title=title, description=description, rate=rate, status=status)
     if UserType_MainRules_set.objects.filter(user_type=newuser).exists():
@@ -2510,22 +2592,22 @@ def usertypemainrules_set(request, id):
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
-                new_Facility = UserType_MainRules_set(user_type=newuser, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, status=status)
+                new_Facility = UserType_MainRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
                 new_Facility.save()
 
 
     else:
         # Facility doesn't exist, check if title exists
         if UserType_MainRules_set.objects.filter(title=title).exists():
-            new_user = UserType_MainRules_set(user_type=newuser, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, status=status)
+            new_user = UserType_MainRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
 
         elif UserType_MainRules_set.objects.filter(status=0).exists():
-            new_user = UserType_MainRules_set(user_type=newuser, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, status=status)
+            new_user = UserType_MainRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
         else:
             # Neither facility nor title exist
-            new_user = UserType_MainRules_set(user_type=newuser, title=title, points=points, num_pc=num_pc, num_attendies=num_attendies, description=description,  rate=rate, status=status)
+            new_user = UserType_MainRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
 
     if user_id is not None:
@@ -2539,16 +2621,23 @@ def usertypemainrules_set(request, id):
 def is_setusermainrules_status(request):
     user_id = request.session.get('user_type_id')
     user_type = request.session.get('user_type')
+    usertypesss = request.session.get('usertype')
+    user_types = UserType_Rules.objects.get(pk=user_id)
     # setting_facility = Setting_Facility.objects.filter(facility=facility)
+    main_rules = UserType_MainRules_set.objects.filter(user_type=user_type).first()
+    promo_rules = UserType_PromoRules_set.objects.filter(user_type=user_type).first()
 
+    userrule_list = UserType_Rules.objects.get(id=user_type)
     mainrule_list = UserType_MainRules_set.objects.filter(user_type=user_type)
     subrule_list = UserType_SubRules_set.objects.filter(user_type=user_type)
     promorule_list = UserType_PromoRules_set.objects.filter(user_type=user_type)
 
+
     mainrules_list = UserType_MainRules_set.objects.filter(user_type=user_type)
     subrules_list = UserType_SubRules_set.objects.filter(user_type=user_type)
     promorules_list = UserType_PromoRules_set.objects.filter(user_type=user_type)
-    
+    main_list = UserType_MainRules_set.objects.filter(user_type=user_type)
+
     setting_list = Setting_UserType.objects.filter(user_type=user_type)
 
     if mainrule_list.exists():
@@ -2575,8 +2664,19 @@ def is_setusermainrules_status(request):
     # Update the settings in a single call
     setting_list.update(mainrules=mainrule, subrules=subrule, promorules=promorule)
 
+    for main_rule in main_list:
+        user_types.title = main_rule.title
+        user_types.description = main_rule.description
+        user_types.status = main_rule.status
+        user_types.adv_booking = main_rule.adv_booking
+        user_types.lim_booking = main_rule.lim_booking
+        user_types.cancel_fee = main_rule.cancel_fee
+        user_types.save()
+
+
+
     # mainrules.save()
-    message = f"Rules successfully set."
+    message = f"Rule has been set to {user_types.user_type}."
 
     messages.success(request, message)
 
@@ -2787,11 +2887,10 @@ def usertypepromorules_set(request, id):
 
     newuser = request.POST.get('user_type', user_type)
     title = request.POST.get('title',promorules.title)
+    adv_booking = request.POST.get('adv_booking',promorules.adv_booking)
+    lim_booking = request.POST.get('lim_booking',promorules.lim_booking)
+    cancel_fee = request.POST.get('cancel_fee',promorules.cancel_fee)
     description = request.POST.get('description', promorules.description)
-    new_rate = request.POST.get('new_rate', promorules.new_rate)
-    start_date = request.POST.get('start_date', promorules.start_date)
-    end_date = request.POST.get('end_date', promorules.end_date)
-    capacity = request.POST.get('capacity', promorules.capacity)
     status = 0
     
     # new_Facility = Facility_MainRules_set(facility=newfacility, title=title, description=description, rate=rate, status=status)
@@ -2806,20 +2905,20 @@ def usertypepromorules_set(request, id):
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
-                new_Facility = UserType_PromoRules_set(user_type=newuser, title=title, description=description, new_rate=new_rate, start_date=start_date, end_date=end_date, capacity=capacity, status=status)
+                new_Facility = UserType_PromoRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
                 new_Facility.save()
     else:
         # Facility doesn't exist, check if title exists
         if UserType_PromoRules_set.objects.filter(title=title).exists():
-            new_user = UserType_PromoRules_set(user_type=newuser, title=title, description=description, new_rate=new_rate, start_date=start_date, end_date=end_date, capacity=capacity, status=status)
+            new_user = UserType_PromoRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
 
         elif UserType_PromoRules_set.objects.filter(status=0).exists():
-            new_user = UserType_PromoRules_set(user_type=newuser, title=title, description=description, new_rate=new_rate, start_date=start_date, end_date=end_date, capacity=capacity, status=status)
+            new_user = UserType_PromoRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
         else:
             # Neither facility nor title exist
-            new_user = UserType_PromoRules_set(user_type=newuser, title=title, description=description, new_rate=new_rate, start_date=start_date, end_date=end_date, capacity=capacity, status=status)
+            new_user = UserType_PromoRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
             new_user.save()
 
     if user_id is not None:
@@ -3001,6 +3100,7 @@ def displayall_setting_usertype(request):
     usertype = User_Type.objects.all()
     if request.method == 'POST':
         forms = RulesUserTypeForm(request.POST)
+        user_typers = UserTypeRulesForm(request.POST)
         if forms.is_valid():
             # Check if a record with the same facility already exists
             user_type = forms.cleaned_data['user_type']
@@ -3015,11 +3115,19 @@ def displayall_setting_usertype(request):
                 messages.warning(request, message)
                 
 
+
+        
+        if user_typers.is_valid():
+            new_usert =  user_typers.save()
+            Setting_UserType.objects.create(user_type=new_usert)
+            user_typers.save()
+
     else:
         # Set the initial value of the 'facility' field in the form
         forms = RulesUserTypeForm() 
+        user_typers = UserTypeRulesForm() 
 
-    return render(request, 'usertype_table.html', {'setting_usertype': setting_usertype, 'forms':forms, 'firstname':firstname, 'usertype':usertype})
+    return render(request, 'usertype_table.html', {'setting_usertype': setting_usertype, 'forms':forms, 'firstname':firstname, 'usertype':usertype, 'user_typers':user_typers})
 
 @login_required
 @user_passes_test(is_superuser)

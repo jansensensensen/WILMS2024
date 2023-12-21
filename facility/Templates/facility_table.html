@@ -45,6 +45,7 @@
             <th>PROMO RULES</th>
             <th>SUB RULES</th>
             <th>FACILITY TYPE</th>
+            <th></th>
             <th>ACTION</th>
           </tr>
         </thead>
@@ -57,7 +58,8 @@
             <td>{{ sf.mainrules }}</td>
             <td>{{ sf.promorules }}</td>
             <td>{{ sf.subrules }}</td>
-            <td style="font-size: smaller; width:max-content ;">{{ sf.facility_type }}<button style="margin-left: 5%;" data-bs-toggle="modal" data-bs-target="#facirules" data-bs-toggle="modal" class="btn btn-primary" >Change</button> </td>
+            <td style="font-size: smaller; width:max-content ;">{{ sf.facility_type }}</td>
+            <td><button style="margin-left: 5%;" data-bs-toggle="modal" data-bs-target="#facirules" data-bs-toggle="modal" class="btn btn-primary" >Change</button></td>
             <td><button class="btndel">
               <a class="btndel" href="{% url 'facility:facilityRules' sf.id %}">Edit</a>
             </button>

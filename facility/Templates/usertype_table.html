@@ -2,6 +2,34 @@
 {% load static %}
 {% block facility_content %}
 
+
+<div class="modal fade" id="user_types" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <form method="POST" class="modal-dialog modal-dialog-centered" id="add_user_type">
+    {% csrf_token %}
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">User Type</h5>
+      </div>
+      <div class="modal-body">
+        {% if user_type.errors %}
+          <div class="alert alert-danger">
+            {% for field in user_type %}
+              {% for error in field.errors %}
+                <strong>{{ error }}</strong>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        {{ user_typers.as_p }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add User Type</button>
+      </div>
+    </div>
+  </form>
+</div>
+
   <div class="modal" id="usertype" > 
     <form method="POST" class="modal-dialog modal-dialog-centered" id="Add_faci">
       <div class="modal-content">
@@ -36,6 +64,7 @@
       <h3 style="font-weight: 50px; ">User Type Rules Table</h3><br>
       <table class="center" cellspacing="2" style="display: center; padding:0; height: 100vh; overflow: auto;">
         <button data-bs-toggle="modal" data-bs-target="#usertype" data-bs-toggle="modal" class="btn btn-primary" >Choose User Type</button>  
+        <button data-bs-toggle="modal" data-bs-target="#user_types" class="btn btn-primary" style="margin-left: 80%;">add user type</button>
         <thead>
           <tr>
             <th>ID</th>

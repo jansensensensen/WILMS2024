@@ -374,7 +374,7 @@ class Transaction(models.Model):
 # ----------------------------------------------------------------------------------------------------------------------USER
 class UserType_Rules(models.Model):
     user_type = models.CharField(max_length=100,null=True,default=None)
-    title = models.CharField(max_length=100,null=False, unique="title")
+    title = models.CharField(max_length=100,null=False)
     description = models.CharField(max_length=255,null=False)
     status = models.BooleanField(default=0)
     adv_booking = models.IntegerField(null=True, default=0)
@@ -388,10 +388,9 @@ class UserType_Rules(models.Model):
         # Update the modified_at timestamp whenever the object is saved
         self.modified_at = timezone.now()
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
     
+    def __str__(self):
+        return self.user_type
 
 
 #     advance booking 2weeks per hr
@@ -485,6 +484,8 @@ class UserType_PromoRules(models.Model):
     cancel_fee = models.IntegerField(null=True, default=0)
     is_expired = models.BooleanField(default=0)
     is_available = models.BooleanField(default=0)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -507,6 +508,8 @@ class UserType_PromoRules_set(models.Model):
     cancel_fee = models.IntegerField(null=True, default=0)
     is_expired = models.BooleanField(default=0)
     is_available = models.BooleanField(default=0)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
     modified_at = models.DateTimeField(default=timezone.now, null=False)
@@ -520,7 +523,7 @@ class UserType_PromoRules_set(models.Model):
         return self.title  
     
 class Setting_UserType(models.Model):
-    user_type = models.ForeignKey(User_Type, null=True, on_delete=models.CASCADE)
+    user_type = models.ForeignKey(UserType_Rules, null=True, on_delete=models.CASCADE)
     mainrules = models.ForeignKey(UserType_MainRules_set, null=True, on_delete=models.CASCADE)
     promorules = models.ForeignKey(UserType_PromoRules_set, null=True, on_delete=models.CASCADE)
     subrules = models.ForeignKey(UserType_SubRules_set, null=True, on_delete=models.CASCADE)

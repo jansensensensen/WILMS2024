@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Sched_Type, Setting_Facility, Setting_UserType, Transaction, User, User_Type, UserType_MainRules, UserType_MainRules_set, UserType_PromoRules, UserType_PromoRules_set, UserType_SubRules, UserType_SubRules_set
+from .models import CalendarEvent, Facility, Facility_MainRules, Facility_MainRules_set, Facility_PromoRules, Facility_PromoRules_set, Facility_SubRules, Facility_SubRules_set, Facility_type, Revenue_Transaction, Sched_Type, Setting_Facility, Setting_UserType, Transaction, User, User_Type, UserType_MainRules, UserType_MainRules_set, UserType_PromoRules, UserType_PromoRules_set, UserType_Rules, UserType_SubRules, UserType_SubRules_set
 
 class FacilityForm(ModelForm):
     facilityname = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Facility Name'}))
@@ -435,33 +435,19 @@ class ChartTypeForm(forms.Form):
     chart_type = forms.ChoiceField(choices=[('bar', 'Bar'), ('line', 'Line')], initial='bar')
 
 
-class UserTypeMainRulesForm(ModelForm):
-    # facility = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    
-    # points = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Points consumption per week'}))
-    # num_pc = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of PC Facility can book'}))
-    # num_attendies = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Number of person can attend'}))
-    
-    # rate = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Rate per person'}))
-    # status = forms.BooleanField()
-    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
-    description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
-    adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
-    lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
-    cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+class UserTypeRulesForm(ModelForm):
+    user_type = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Add User Type'}))
 
     class Meta:
-        model = UserType_MainRules
-        fields = ['title','description','adv_booking','lim_booking','cancel_fee']
-        exclude = ['status','user_type']  
+        model = UserType_Rules 
+        fields = ['user_type'] 
+        exclude = ['title','description','adv_booking','lim_booking','cancel_fee']
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields['status'].initial = False  # Set 'status' field's initial value to False (0)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)# Set 'status' field's initial value to False (0)
 
 #Update Main Rules forms on progress 
-
-class UpdateUserTypeMainRulesForm(ModelForm):
+class UserTypeMainRulesForm(ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Add Title'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Description'}))
     adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
@@ -549,10 +535,12 @@ class UserTypePromoRulesForm(ModelForm):
     adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
     lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
     cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+    start_date = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))
+    end_date = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))
 
     class Meta:
         model = UserType_PromoRules
-        fields = ['title','description','adv_booking','lim_booking','cancel_fee', 'status']
+        fields = ['title','description','adv_booking','lim_booking','cancel_fee','start_date','end_date']
         exclude = ['status', 'facility']
 
         def __init__(self, *args, **kwargs):
@@ -567,10 +555,12 @@ class UserTypePromoRulesSetForm(ModelForm):
     adv_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Weeks of advance booking'}))
     lim_booking = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Limit of booking per week'}))
     cancel_fee = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Cancellation fee'}))
+    start_date = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))
+    end_date = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))
 
     class Meta:
         model = UserType_PromoRules_set
-        fields = ['user_type','title','description','adv_booking','lim_booking','cancel_fee', 'status']
+        fields = ['user_type','title','description','adv_booking','lim_booking','cancel_fee', 'status', 'start_date','end_date' ]
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

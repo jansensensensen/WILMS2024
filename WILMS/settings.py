@@ -17,30 +17,10 @@ SECRET_KEY = 'django-insecure-n9gx_l8!6tp*^ws9tov)vkt1djt+%pp=l(^d5^bdzrt16difxy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.16.103.217','localhost','windows.nginx','127.0.0.1','172.16.103.217:8888']
+ALLOWED_HOSTS = ['172.16.103.217','localhost','windows.nginx','127.0.0.1','*']
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then CORS_ALLOWED_ORIGINS will not have any effect
 CORS_ALLOW_CREDENTIALS = True
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'api','frontend')
-            
-            ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'wallet.context_processors.user_context_processor',
-            ],
-        },
-    },
-]
 
 
 # Application definition
@@ -82,8 +62,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            # os.path.join(BASE_DIR,'templates'),
             os.path.join(BASE_DIR,'frontend','templates'),
-            os.path.join(BASE_DIR,'api','frontend'),
+            os.path.join(BASE_DIR,'api','templates','frontend'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -161,7 +142,6 @@ STATICFILES_DIRS = [
     
     os.path.join(BASE_DIR, 'api','templates','frontend','static'),
     os.path.join(BASE_DIR, 'api','templates','frontend'),
-    os.path.join(BASE_DIR, 'api','templates','frontend'),
     os.path.join(BASE_DIR, 'polls','static'),
     os.path.join(BASE_DIR, 'polls','static','facility'),
     os.path.join(BASE_DIR, 'wiladmin','static'),
@@ -200,7 +180,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
     
