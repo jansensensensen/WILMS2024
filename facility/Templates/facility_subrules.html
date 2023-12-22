@@ -53,10 +53,10 @@
         <input type="text" class="facilabel" value="{{sfacility.facility}}" style=" font-size: larger; width: 40%; margin-top: 1rem;" disabled>
         <card class="card">
           <h5 style="font-weight: bold; margin-bottom: 1px;">Main Rules</h5>
-          <table class="" style=" height: 60px; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
+          <table class="" style=" height: 60px; width: 100%; border-radius: 5px; border-spacing: 2rem; overflow: hidden;">
             <tbody class="tablerule">
             {% for f in fmainrules %} 
-            <tr>
+            <tr style="width: 100%;">
               <td class="promo" name="mainrule" value="{{f.id}}">{{f.title}}</td>
               <td style="width:5rem;"><a href="{% url 'facility:delfmstatus' f.id %}">🗑️</a></td>
               {% empty %}

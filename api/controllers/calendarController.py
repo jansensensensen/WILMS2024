@@ -13,8 +13,8 @@ from rest_framework import *
 # from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from api.models import Booking,Venue,User as user,Attendee
-from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer,EventsSerializer
+from api.models import Booking,Venue,Attendee
+from api.serializers import BookingSerializer, UserRulesrializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer,EventsSerializer
 from wallet.models import User as WalletUser
 from wallet.models import UserProfileInfo
 # from rest_framework.permissions import IsAuthenticated,AllowAny
@@ -23,7 +23,7 @@ from datetime import datetime, date, timedelta
 from rest_framework.decorators import api_view,authentication_classes,permission_classes
 # from django.contrib.auth.models import User
 from django.http import JsonResponse
-from facility.models import CalendarEvent
+from facility.models import CalendarEvent, UserType_Rules,Facility
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
@@ -76,6 +76,7 @@ class CalendarController():
                 endTimeConflictCount=Booking.objects.filter(endTime__gte=startTime,endTime__lte=endTime).count()
                 # paid using coins
                 userprofile=UserProfileInfo.objects.get(user=serializer.validated_data['user'])
+                facility=Facility.objects.get(facilityname=serializer.validated_data['venue'])
                 if points == 0:
                     if userprofile.coin_balance < coins:
                         return Response({"error": f"Insufficient coin balance. You currently have {userprofile.coin_balance} coins."},status=status.HTTP_200_OK)
@@ -96,13 +97,13 @@ class CalendarController():
                 random = str(uuid.uuid4()) # Convert UUID format to a Python string.
                 random = random.upper() # Make all characters uppercase.
                 random = random.replace("-","") # Remove the UUID '-'.
-                refNo= random[0:8]
+                refNo= facility.area_id+random[0:8]
             
                 while Booking.objects.filter(referenceNo=refNo).count()!=0:
                      random = str(uuid.uuid4()) # Convert UUID format to a Python string.
                      random = random.upper() # Make all characters uppercase.
                      random = random.replace("-","") # Remove the UUID '-'.
-                     refNo= random[0:8]
+                     refNo= facility.area_id+random[0:8]
                 serializer._validated_data['referenceNo']=refNo
                 userprofile.save()
                 serializer.save()
@@ -127,6 +128,22 @@ class CalendarController():
         obj= CalendarEvent.objects.filter(date__gte=week_start,date__lte=week_end)
         serializer= EventsSerializer(obj,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    @api_view(['GET'])
+    def getRules(request,user_type):
+        if user_type==None:
+            return Response({"error":"user type not found"},status=status.HTTP_200_OK)
+        try:
+            # Add except or finally clause here
+            obj=UserType_Rules.objects.get(id=user_type)
+            pass
+        except:
+            # Handle the exception here
+            return Response({"error":"user type not found"},status=status.HTTP_200_OK)
+            pass
+            
+        serializer= UserRulesrializer(obj)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 # class CurrentBookings(APIView):
 #     # permission_classes=[IsAuthenticated,]
 #     # api to get bookings within 2 weeks ra   
@@ -135,7 +152,7 @@ class CalendarController():
 #     def get(self,request,id):
 #         print(id)
 #         obj=Booking.objects.filter(venue=id)
-#         serializer=BookingSerializer(obj,many=True)    
+#         serializer=BookingSerializer(obj,many=True)     
 #         return Response(serializer.data,status=status.HTTP_200_OK)
     
 # class Users(APIView):

@@ -9,7 +9,7 @@ from rest_framework import *
 # from rest_framework.views import APIView
 from rest_framework import status
 from api.models import Attendance
-from api.models import Booking,Venue,User as user,Attendee
+from api.models import Booking,Venue,Attendee
 from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer
 # from rest_framework.permissions import IsAuthenticated,AllowAny
 from api.jwt_util import decode_user
@@ -21,6 +21,7 @@ from wallet.models import User as WalletUser
 from django.http import JsonResponse
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
+from facility.models import Facility
 from django.core.exceptions import ObjectDoesNotExist
 class TapController():
     @api_view(['POST'])
@@ -89,9 +90,9 @@ class TapController():
                         if booking.isUsed==False:                        
                             booking.isUsed=True
                             booking.save()
-                        venue=Venue.objects.get(id=booking.venue.id)
+                        venue=Facility.objects.get(id=booking.venue.id)
                         hasBooking=1
-                        Attendance.objects.create(signInTime=datetime.datetime.now().time(),venueName=venue.name,booking=booking,name=name,venueId=venue.id,isSignedIn=True)
+                        Attendance.objects.create(signInTime=datetime.datetime.now().time(),booking=booking,name=name,venueId=venue.id,isSignedIn=True)
             if hasBooking <= 0:
                 return JsonResponse({"message":"You Have No Booking within 30 minutes!","state":"noBooking"},status=status.HTTP_200_OK)
             else:

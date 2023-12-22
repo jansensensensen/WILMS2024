@@ -1,38 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block facility_content %}
-  <div class="modal" id="facirules" > 
+{% for sf in setting_facility %}
+<div class="modal" id="warning-{{sf.id}}">
   <form method="POST" class="modal-dialog modal-dialog-centered" id="Add_faci">
     <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel2">Add Facility</h5>
-        </div>
-        <div class="modal-body">
-          {% csrf_token %}
-          <!-- <input list="facility" name="facility" placeholder="Choose Type of Schedule"/>
-          <datalist id="facility">
-            <option value="{{forms.facility_type}}">
-          </datalist> -->
-
-          <select name="facility_type" id="inputGroupSelect01">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel2">Add Facility</h5>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ sf.id }}">
+        <select name="facility_type" id="inputGroupSelect01">
             {% for f in facility_type %}
-            <option name="facility_type" type="submit"  value ="{{f.id}}">{{f.facility_type}}</option>
+                <option value="{{ f.id }}">{{ f.facility_type }}</option>
             {% endfor %}
-          </select>
-
-           
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><a href="{% url 'facility:facility' %}">Cancel</a></button>
-            <button type="submit" class="btn btn-primary" data-bs-target="update_faci">Change</button>
-        </div>
+        </select>
     </div>
-</form>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+      </button>
+      <button type="submit" class="btn btn-primary">Change</button>
+  </div>
+    </div>
+  </form>
 </div>
+{% endfor %}
 
 <!-- BUTTON TO ADD FACILITY -->
     <!-- <button type="submit" class="add-fac" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Facility</button> -->
-    <div class="label-page"  style="padding: 10px;">FACILITY<a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:facility' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="🔙"></a></div>
+    <div class="label-page"  style="padding: 10px;">FACILITY<a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:facility' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div>
     <div class="table">
       <h3 style="font-weight: 50px;">Facility Rules Table</h3><br>
       <table class="center" cellspacing="2" style="display: center;">
@@ -45,8 +43,6 @@
             <th>PROMO RULES</th>
             <th>SUB RULES</th>
             <th>FACILITY TYPE</th>
-            <!-- <th></th>
-            <th>ACTION</th> -->
           </tr>
         </thead>
 
@@ -58,8 +54,17 @@
             <td>{{ sf.mainrules }}</td>
             <td>{{ sf.promorules }}</td>
             <td>{{ sf.subrules }}</td>
-            <!-- <td style="font-size: smaller; width:max-content ;">{{ sf.facility_type }}</td>
-            <td><button style="margin-left: 5%;" data-bs-toggle="modal" data-bs-target="#facirules" data-bs-toggle="modal" class="btn btn-primary" >Change</button></td> -->
+            
+            <!-- <td style="font-size: smaller; width:max-content ;">{{ f.facility_type }}</td>
+            
+            <td><button style="margin-left: 5%;" 
+            class="btn btn-primary" 
+            data-bs-toggle="modal" 
+            data-bs-target="#warning-{{ sf.id }}" 
+            data-facilityname="{{ sf.facility }}"  
+            data-facility-id="{{ sf.id }}">
+        Change
+    </button></td> -->
             <td><button class="btndel">
               <a class="btndel" href="{% url 'facility:facilityRules' sf.id %}">Edit</a>
             </button>

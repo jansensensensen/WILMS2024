@@ -54,6 +54,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'facility.middleware.ApplyRulesMiddleware',
+    # 'facility.middleware.ApplyUsertypeRulesMiddleware',
+
 ]
 
 ROOT_URLCONF = 'WILMS.urls'

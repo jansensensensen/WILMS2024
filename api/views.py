@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import *
 from rest_framework.views import APIView
 from rest_framework import status
-from api.models import Booking,Venue,User as users,Attendee
+from api.models import Booking,Venue,Attendee
 from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from api.jwt_util import decode_user
@@ -48,6 +48,10 @@ def login(request):
     else:
         refresh['role']='user'
     refresh['is_staff']= userFound.is_staff
+    if(userFound.user_type==None):
+        refresh['user_type']=None
+    else:
+        refresh['user_type']=userFound.user_type.id
     data={
         'refresh':str(refresh),
         'access':str(refresh.access_token),

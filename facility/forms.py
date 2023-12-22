@@ -49,15 +49,30 @@ class FacilityForm(ModelForm):
     #     return self.cleaned_data['facilityname'] + str(self.cleaned_data['area_id']) + ") " + " ( " + str(self.cleaned_data['rateperhour']) + ")" + " (" + str(self.cleaned_data['person_rateperhour']) + ") "  + " (" + str(self.cleaned_data['capacity']) + ") " 
 
 class FacilityUpdateForm(ModelForm):
+
+    CONFERENCE = 1
+    CO_WORKING = 0
+
+    # Choices for the is_conference field
+    IS_CONFERENCE_CHOICES = [
+        (CONFERENCE, 'Conference'),
+        (CO_WORKING, 'Co-Working'),
+    ]
+
     facilityname = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Facility Name'}))
     area_id = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Enter Area ID'}))
     rateperhour = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Facility rate/hour'}))
     person_rateperhour = forms.FloatField(widget=forms.NumberInput(attrs={'placeholder':'Attendies rate/hour'}))
     capacity = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'Enter Capacity'}))
-
+    is_conference = forms.ChoiceField(
+        choices=IS_CONFERENCE_CHOICES,
+        widget=forms.RadioSelect,
+        initial=CO_WORKING,  # Set default value if needed
+        label='Select Facility Type'
+    )
     class Meta:
         model = Facility
-        fields = ['facilityname', 'area_id', 'rateperhour', 'person_rateperhour', 'capacity']
+        fields = ['facilityname', 'area_id', 'rateperhour', 'person_rateperhour', 'capacity', 'is_conference']
 
     # def clean(self):
     #     cleaned_data = super().clean()

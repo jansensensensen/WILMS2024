@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 import uuid
 
+from facility.models import UserType_Rules
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -21,22 +23,13 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    STUDENT = 'student'
-    TEACHER = 'teacher'
-    ADMIN = 'admin'
-
-    USER_TYPES = [
-        (STUDENT, 'Student'),
-        (TEACHER, 'Teacher'),
-        (ADMIN, 'Admin'),
-    ]
-
     email = models.EmailField(unique=True)
-    user_type = models.CharField(max_length=10, choices=USER_TYPES, default=STUDENT)
+    user_type = models.ForeignKey(UserType_Rules, null=True, on_delete=models.CASCADE)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)  # Set default to True for students
     is_verified = models.BooleanField(default=False)
     is_disabled = models.BooleanField(default=False)
+    
 
     objects = UserManager()
 
@@ -57,6 +50,8 @@ class UserProfileInfo(models.Model):
     points_to_give = models.FloatField(default=0.0)
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     rfid_value = models.CharField(max_length=50,unique=True, blank=True, null=True)  # Add this field for storing RFID values
+    # has_debt = models.BooleanField(default=False)
+    # debt = models.FloatField(default=0.0)
 
 
     def __str__(self):

@@ -4,7 +4,8 @@ from django.views.generic.list import ListView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
-from facility.models import Facility_SubRules_set, Setting_Facility, Facility
+from facility.forms import UserTypeRulesForm
+from facility.models import Facility_SubRules_set, Setting_Facility, Facility, Setting_UserType, UserType_Rules
 from wallet.forms import UserForm, UserProfileInfoForm,CoinTransactionForm, TransactionApprovalForm, UserProfileInfoUpdateForm
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse, JsonResponse
@@ -25,6 +26,8 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from rest_framework import status
 from api.models.BookingModel import Booking
+from django.core.serializers.json import DjangoJSONEncoder
+
 import json
 
 
@@ -235,72 +238,177 @@ class DashboardView(View):
 #     firstname = request.session.get('firstname') 
 #     return render(request, 'base.html', {'firstname':firstname})
 
+def create_usertype(request):
+    firstname = request.session.get('firstname') 
+    usertype = UserType_Rules.objects.all()
+    if request.method == 'POST':
+        user_typers = UserTypeRulesForm(request.POST)
+
+        if user_typers.is_valid():
+            new_usert =  user_typers.save()
+            Setting_UserType.objects.create(user_type=new_usert)
+            user_typers.save()
+    else:
+        user_typers = UserTypeRulesForm() 
+    return render(request, 'user_list.html', {'firstname':firstname, 'usertype':usertype, 'user_typers':user_typers})
+        
+        
 class UserListView(View):
+    template_name = 'wallet/user_list.html'
     @method_decorator(login_required)
     def get(self, request):
         firstname = request.session.get('firstname') 
-        if request.user.is_superuser:
-            try:
-                user = User.objects.get(email=request.user)
-                email = user.email
-                transactions = Transaction.objects.all().order_by('-date')
-                users = UserProfileInfo.objects.all()
-                userT=User.objects.all()
-            except UserProfileInfo.DoesNotExist:
-                transactions = []
+        usertype = UserType_Rules.objects.all()
+        user_typers = UserTypeRulesForm()
 
-            
-            context = {
-                'email':email,  
-                'user':user,
-                'users': users,
-                'transactions': transactions,
-                'userT':userT,
-                'firstname':firstname,
-            }
-            return render(request, 'wallet/user_list.html', context)
-        else:
-            return HttpResponseForbidden("You do not have permission to access this page.")
+        # Fetch the users
+        users = UserProfileInfo.objects.all()
+
+        if request.method == 'POST':
+            # Check if the form submitted is the account type update form
+            if 'changeAccountTypeForm' in request.POST:
+                user_id_to_change = request.POST.get('user_id')
+                selected_user_type = request.POST.get('newAccountType')
+
+                user = get_object_or_404(User, id=user_id_to_change)
+                user_type_instance = get_object_or_404(UserType_Rules, user_type=selected_user_type)
+
+                user.user_type = user_type_instance
+                user.save()
+
+                messages.success(request, 'Account type updated successfully.')
+
+                # Rest of your view logic...
+
+                return redirect('your_redirect_url')  # Redirect to the appropriate page
+
+        # Continue with the rest of your view logic...
+
+        context = {
+            'users': users,
+            'firstname': firstname,
+            'usertype': usertype, 
+            'user_typers': user_typers
+        }
+
+        return render(request, self.template_name, context)
 
     @method_decorator(csrf_protect)
     def post(self, request):
-        recipient_id = request.POST.get('recipient')
-        sender_id = request.POST.get('sender')
-        raw_points = request.POST.get('points')
+            recipient_id = request.POST.get('recipient')
+            sender_id = request.POST.get('sender')
+            raw_points = request.POST.get('points')
+
+            try:
+                # Convert the raw_points to Decimal and validate if it's non-negative
+                points = float(raw_points)
+                if points < 0:
+                    return JsonResponse({'error': 'Points must be non-negative'})
+                else:
+                    recipient = get_user_model().objects.get(id=recipient_id)
+                    sender = get_user_model().objects.get(id=sender_id)
+                    recipient_profile = UserProfileInfo.objects.get(user_id=recipient.id)
+                    sender_profile = UserProfileInfo.objects.get(user_id=sender.id)
+
+                    recipient_profile.point_balance += points
+                    recipient_profile.save()
+
+                    transaction = Transaction.objects.create(recipient=recipient, sender=sender, points=points)
+
+                    users = UserProfileInfo.objects.all()
+                    user_data = []
+                    for user in users:
+                        full_name = f"{user.first_name} {user.last_name}"
+                        user_data.append({
+                            'email': user.user.email,
+                            'id': user.profile_id,
+                            'name': full_name,
+                            'first_name': user.first_name,
+                            'last_name': user.last_name,
+                            'point_balance': user.point_balance,
+                        })
+
+                    return JsonResponse({'users': user_data})
+
+            except (get_user_model().DoesNotExist, UserProfileInfo.DoesNotExist):
+                return JsonResponse({'error': 'Invalid input or user does not exist'})
+        
+
+class UserTypeRulesView(View):
+    template_name = 'wallet/user_list.html'  # Change 'your_app' to your actual app name
+
+    def get(self, request):
+        usertype = UserType_Rules.objects.all()
+        user_typers = UserTypeRulesForm()
+        
+        context = {
+            'usertype': usertype,
+            'user_typers': user_typers,
+        }
+        
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        usertype = UserType_Rules.objects.all()
+        user_typers = UserTypeRulesForm(request.POST)
+
+        if user_typers.is_valid() and 'submit_user_type_rules_form' in request.POST:
+            new_usert = user_typers.save()
+            Setting_UserType.objects.create(user_type=new_usert)
+            user_typers.save()
+
+            # Redirect to a different view or URL after form submission
+            return redirect(reverse('wallet:userlist'))
+
+        # If the form is not valid or the submit button is not pressed
+        context = {
+            'usertype': usertype,
+            'user_typers': user_typers,
+        }
+
+        return render(request, self.template_name, context)
+    
+class UpdateAccountTypeView(View):
+    template_name = 'wallet/user_list.html'
+
+    @method_decorator(login_required)
+    def post(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        selected_user_type = request.POST.get('newAccountType')
+
+        # Get the UserType_Rules instance based on the selected user type
+        user_type_instance = get_object_or_404(UserType_Rules, user_type=selected_user_type)
+
+        # Assign the UserType_Rules instance to the user_type field
+        user.user_type = user_type_instance
+        user.save()
+
+        # Now you can access the user_user_type_id from the UserType_Rules instance
+        user_user_type_id = user_type_instance.id
+
+        # Serialize only relevant information from the User object
+        serialized_user = {
+            'id': user.id,
+            'email': user.email,
+            # Add more fields as needed
+        }
+
+        # Assuming you need some context data for rendering the template
+        context = {
+            'users': [serialized_user],  # Convert to a list for serialization
+            'user_type_rules': UserType_Rules.objects.all(),
+            'user_user_type_id': user_user_type_id,
+            # Add more context data as needed
+        }
 
         try:
-            # Convert the raw_points to Decimal and validate if it's non-negative
-            points = float(raw_points)
-            if points < 0:
-                return JsonResponse({'error': 'Points must be non-negative'})
-            else:
-                recipient = get_user_model().objects.get(id=recipient_id)
-                sender = get_user_model().objects.get(id=sender_id)
-                recipient_profile = UserProfileInfo.objects.get(user_id=recipient.id)
-                sender_profile = UserProfileInfo.objects.get(user_id=sender.id)
-
-                recipient_profile.point_balance += points
-                recipient_profile.save()
-
-                transaction = Transaction.objects.create(recipient=recipient, sender=sender, points=points)
-
-                users = UserProfileInfo.objects.all()
-                user_data = []
-                for user in users:
-                    full_name = f"{user.first_name} {user.last_name}"
-                    user_data.append({
-                        'email': user.user.email,
-                        'id': user.profile_id,
-                        'name': full_name,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name,
-                        'point_balance': user.point_balance,
-                    })
-
-                return JsonResponse({'users': user_data})
-
-        except (get_user_model().DoesNotExist, UserProfileInfo.DoesNotExist):
-            return JsonResponse({'error': 'Invalid input or user does not exist'})
+            # Try to serialize the context to JSON using Django's JSON encoder
+            serialized_context = json.dumps(context, cls=DjangoJSONEncoder)
+            return JsonResponse({'success': True, 'message': 'Account type updated successfully', 'data': serialized_context})
+        except Exception as e:
+            # Log the exception for debugging purposes
+            print(f"Error serializing context to JSON: {e}")
+            return JsonResponse({'error': 'Failed to serialize context to JSON'})
 
 
 class UserDashboardView(View):
@@ -314,6 +422,7 @@ class UserDashboardView(View):
             email=User.objects.get(email=request.user)
             coin_balance = profile.coin_balance
             point_balance = profile.point_balance
+            usertype=user.user_type_id
             email=user.email
         except UserProfileInfo.DoesNotExist:
             coin_balance = 0.0
@@ -324,6 +433,7 @@ class UserDashboardView(View):
             'point_balance': point_balance,
             'first_name':first_name,
             'email':email,
+            'usertype':usertype,
         }
         return render(request, 'wallet/userDashboard.html',context)
     
@@ -592,38 +702,38 @@ class ChangePasswordView(PasswordChangeView):
 
 #Increment 4
 method_decorator(csrf_exempt)  # Use csrf_exempt for this view since you will be making an AJAX request
-class UpdateAccountTypeView(View):
-    def post(self, request, id):
-        user = get_object_or_404(get_user_model(), id=id)
-        is_superuser = request.POST.get('isSuperuser') == 'true'
-        is_staff = request.POST.get('isStaff') == 'true'
-        user.user_type = "teacher"
-        try:
-            user.is_superuser = is_superuser
-            user.is_staff = is_staff
+# class UpdateAccountTypeView(View):
+#     def post(self, request, id):
+#         user = get_object_or_404(get_user_model(), id=id)
+#         is_superuser = request.POST.get('isSuperuser') == 'true'
+#         is_staff = request.POST.get('isStaff') == 'true'
+#         # user.user_type = "teacher"
+#         try:
+#             user.is_superuser = is_superuser
+#             user.is_staff = is_staff
             
-            user.save()
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+#             user.save()
+#             return JsonResponse({'success': True})
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'error': str(e)})
     
-    @method_decorator(login_required)
-    def get(self, request):
-        if request.user.is_superuser:
-            try:
-                user_profile = UserProfileInfo.objects.get(user=request.user)
-                transactions = Transaction.objects.all
-            except UserProfileInfo.DoesNotExist:
-                transactions = []
+#     @method_decorator(login_required)
+#     def get(self, request):
+#         if request.user.is_superuser:
+#             try:
+#                 user_profile = UserProfileInfo.objects.get(user=request.user)
+#                 transactions = Transaction.objects.all
+#             except UserProfileInfo.DoesNotExist:
+#                 transactions = []
 
-            users = UserProfileInfo.objects.all()
-            context = {
-                'users': users,
-                'transactions': transactions,
-            }
-            return render(request, 'wallet/user_list.html', context)
-        else:
-            return HttpResponseForbidden("You do not have permission to access this page.")
+#             users = UserProfileInfo.objects.all()
+#             context = {
+#                 'users': users,
+#                 'transactions': transactions,
+#             }
+#             return render(request, 'wallet/user_list.html', context)
+#         else:
+#             return HttpResponseForbidden("You do not have permission to access this page.")
 
 
 

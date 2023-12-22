@@ -51,7 +51,7 @@ from django.core import serializers
 from .models import Setting_Facility, User_Type, User
 from api.models import Booking, Attendance
 from django.core.signals import request_started
-from .models import Notification  # Import your Notification model
+# from .models import Notification  # Import your Notification model
 # import schedule
 # from schedule import every, repeat
 
@@ -93,19 +93,19 @@ def is_superuser(user):
 
 
 
-def create_notification(request, notification_message):
-    # Get the current user (assuming you're using Django's built-in authentication)
-    current_user = request.user
+# def create_notification(request, notification_message):
+#     # Get the current user (assuming you're using Django's built-in authentication)
+#     current_user = request.user
 
-    # Create a new notification instance
-    new_notification = Notification.objects.create(
-        user=current_user,
-        message=notification_message,
-        # Other fields as needed for your Notification model
-    )
+#     # Create a new notification instance
+#     new_notification = Notification.objects.create(
+#         user=current_user,
+#         message=notification_message,
+#         # Other fields as needed for your Notification model
+#     )
 
-    # Save the notification to the database
-    new_notification.save()
+#     # Save the notification to the database
+#     new_notification.save()
 
 
 def apply_promo_and_main_rules(request):
@@ -148,6 +148,7 @@ def apply_promo_and_main_rules(request):
                     f.person_rateperhour = promo.person_new_rate
                     f.num_pc = promo.num_pc
                     f.num_attendies = promo.num_attendies
+                    # f.facility_type = f.facility_type
                     f.save()
                     # Update the promo to mark it as expired
                     if promo.is_available == 0:
@@ -550,6 +551,7 @@ def display_facility(request):
         ncapacity = request.POST.get('capacity')
         firstname = request.session.get('firstname') 
         count = Facility.objects.filter(isdeleted=0).count()
+        n_is_conference = request.POST.get('is_conference')
         limit_facility = 8 # Retrieving 'firstname' from session
         lim_rateperhour = 20
         lim_capacity = 300
@@ -584,10 +586,8 @@ def display_facility(request):
                 # Updating an existing facility
                 facility = get_object_or_404(Facility, id=f_id)
                 facility.facilityname = nfacility
-                # facility.area_id = narea_id
-                # facility.rateperhour = nrateperhour
-                # facility.person_rateperhour = nperson_rateperhour
                 facility.capacity = ncapacity
+                facility.is_conference = n_is_conference  # Update is_conference field
                 facility.save()
                 message = "Facility updated successfully"
                 messages.success(request, message)
@@ -771,28 +771,39 @@ def restoreFacility(request, id):
     return redirect(reverse('facility:rulessummary'))
     # return HttpResponseRedirect(reverse('facility:facilityRules', args=[id]))
 
+
 @csrf_protect
 @login_required
 @user_passes_test(is_superuser)
 def displayall_setting_facility(request):
     facility_type = Facility_type.objects.all()
     firstname = request.session.get('firstname')
-    nfacility = request.POST.get('facility')
-    nfacility_type = request.POST.get('facility_type')
     setting_facility = Setting_Facility.objects.filter(isdeleted=0).order_by('id')
-    form = FacilityPromoRulesForm(request.POST)
+    facilityss = Facility.objects.filter(isdeleted=0).order_by('id')
 
     if request.method == 'POST':
-        setting_facility.update(facility_type=nfacility_type)
-        # if form.is_valid():
-            
-        #     form.save()
+        facility_id = request.POST.get('id')
+        nfacility_type_id = request.POST.get('facility_type')
 
-    else:
-        # Set the initial value of the 'facility' field in the form
-        form = RulesFacilityForm() 
-    return render(request, 'facility_table.html', {'setting_facility': setting_facility,'firstname':firstname, 'facility_type':facility_type, 'form':form})
+        print(f"Received facility_id: {facility_id}")
+        print(f"Received nfacility_type_id: {nfacility_type_id}")
 
+        # Get Facility instance by ID
+        facility = get_object_or_404(Facility, pk=facility_id)
+
+        # Get Facility_type instance by ID
+        nfacility_type = get_object_or_404(Facility_type, pk=nfacility_type_id)
+
+        # Assign Facility_type instance to Facility.facility_type
+        facility.facility_type = nfacility_type
+        facility.save()
+
+    return render(request, 'facility_table.html', {
+        'setting_facility': setting_facility,
+        'firstname': firstname,
+        'facility_type': facility_type,
+        'facility':facilityss,
+    })
 
 @csrf_protect
 @login_required
@@ -1266,6 +1277,7 @@ def facilitymainrules_set(request, id):
 def is_setfacilitymainrules_status(request):
     faci_id = request.session.get('faci_id')
     facility = request.session.get('facility')
+    request.session['facirule_id'] = faci_id
     facilitys = Facility.objects.get(pk=faci_id)
     current_date = timezone.now()
     # facilities = get_object_or_404(Facility, facilityname=facility)
@@ -1889,7 +1901,20 @@ def delete_setfacilitypromorules_status(request, id):
     promo = Setting_Facility.objects.filter(promorules=id)
     promo.update(promorules="")
     promorules.delete()
-
+    facility_id = request.session.get('facility')
+    facilitys = Facility.objects.filter(pk=faci_id)
+    promo_list = Facility_PromoRules_set.objects.filter(facility=faci_id)
+    main_list = Facility_MainRules_set.objects.filter(facility=faci_id)
+    for main_rule in main_list:
+        for f in facilitys:
+            f.title = main_rule.title
+            f.description = main_rule.description
+            f.status = main_rule.status
+            f.rateperhour = main_rule.rate
+            f.person_rateperhour = main_rule.person_rate
+            f.num_pc = main_rule.num_pc
+            f.num_attendies = main_rule.num_attendies
+            f.save()
     
 
     if faci_id is not None:
@@ -2037,6 +2062,7 @@ def revenue_dashboard(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     facilities = Facility.objects.filter(isdeleted=False)
+    bookings = Booking.objects.all()
     # months = transactions.bookedDate('transaction_datetime', 'month')  # Assuming 'transaction_datetime' is the correct field name
     # Convert the months to a list of strings
 
@@ -2125,11 +2151,15 @@ def revenue_dashboard(request):
                 'facility_revenue_points':facility_revenue_points,
             }
     # Convert Decimal values to floats before serializing
-    labels = [facility_name for facility_name, stats in facility_stats.items()]
-    # label = [facility_name for facility_name, stats in facility_stats.items()]
-    data_values = [float(stats['facility_revenue']) for facility_name, stats in facility_stats.items()]
-    data_values_coins = [float(stats['facility_revenue_points']) for facility_name, stats in facility_stats.items()]
-    data_values_points = [float(stats['facility_revenue_coins']) for facility_name, stats in facility_stats.items()]
+    labels = [facilityname for facilityname, stats in facility_stats.items()]
+    # label = [facilityname for facilityname, stats in facility_stats.items()]
+    data_values = [float(stats['facility_revenue']) for facilityname, stats in facility_stats.items()]
+    # data_values_coins = [float(stats.get('facility_revenue_coins', 0)) for facilityname, stats in facility_stats.items()]
+
+    data_values_points = [float(stats['facility_revenue_points']) for facility_name, stats in facility_stats.items()]
+    data_values_coins = [float(stats['facility_revenue_coins']) for facility_name, stats in facility_stats.items()]
+    # data_values_points = [float(stats.get('facility_revenue_points', 0)) for facility_name, stats in facility_stats.items()]
+
 
     background_colors = [
         'rgba(255, 0, 0, 0.2)',  # Red with 20% transparency
@@ -2581,14 +2611,22 @@ def usertypemainrules_set(request, id):
     description = request.POST.get('description', mainrules.description)
     status = 0
     # new_Facility = Facility_MainRules_set(facility=newfacility, title=title, description=description, rate=rate, status=status)
-    if UserType_MainRules_set.objects.filter(user_type=newuser).exists():
+    if UserType_MainRules_set.objects.filter(user_type=user_type).exists():
         # Facility exists, check if title is different
+        rules_count = UserType_MainRules_set.objects.filter(user_type=user_type, status=0).count()
         if UserType_MainRules_set.objects.filter(status=1):
             message = f"You have to remove the existing rule first to add new rule"
             messages.warning(request, message)
 
+        elif UserType_MainRules_set.objects.filter(title=title).exists():
+            message = f"You have to remove the existing rule first to add new rule"
+            messages.warning(request, message)
+            
         elif not UserType_MainRules_set.objects.filter(title=title).exists():
-            if UserType_MainRules_set.objects.filter(status=1):
+            if UserType_MainRules_set.objects.filter(status=0):
+                message = f"You have to remove the existing rule first to add new rule"
+                messages.warning(request, message)
+            elif not rules_count > 1:
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
@@ -2762,14 +2800,22 @@ def usertypesubrules_set(request, id):
     description = request.POST.get('description', subrules.description)
     status = 0
     # new_Facility = Facility_MainRules_set(facility=newfacility, title=title, description=description, rate=rate, status=status)
-    if UserType_SubRules_set.objects.filter(user_type=newuser).exists():
+    if UserType_SubRules_set.objects.filter(user_type=user_type).exists():
         # Facility exists, check if title is different
+        rules_count = UserType_SubRules_set.objects.filter(user_type=user_type, status=0).count()
         if UserType_SubRules_set.objects.filter(status=1):
             message = f"You have to remove the existing rule first to add new rule"
             messages.warning(request, message)
 
+        elif UserType_SubRules_set.objects.filter(title=title).exists():
+            message = f"You have to remove the existing rule first to add new rule"
+            messages.warning(request, message)
+            
         elif not UserType_SubRules_set.objects.filter(title=title).exists():
-            if UserType_SubRules_set.objects.filter(status=1):
+            if UserType_SubRules_set.objects.filter(status=0):
+                message = f"You have to remove the existing rule first to add new rule"
+                messages.warning(request, message)
+            elif not rules_count > 1:
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
@@ -2894,19 +2940,28 @@ def usertypepromorules_set(request, id):
     status = 0
     
     # new_Facility = Facility_MainRules_set(facility=newfacility, title=title, description=description, rate=rate, status=status)
-    if UserType_PromoRules_set.objects.filter(user_type=newuser).exists():
+    if UserType_PromoRules_set.objects.filter(user_type=user_type).exists():
         # Facility exists, check if title is different
+        rules_count = UserType_PromoRules_set.objects.filter(user_type=user_type, status=0).count()
         if UserType_PromoRules_set.objects.filter(status=1):
             message = f"You have to remove the existing rule first to add new rule"
             messages.warning(request, message)
 
+        elif UserType_PromoRules_set.objects.filter(title=title).exists():
+            message = f"You have to remove the existing rule first to add new rule"
+            messages.warning(request, message)
+            
         elif not UserType_PromoRules_set.objects.filter(title=title).exists():
-            if UserType_PromoRules_set.objects.filter(status=1):
+            if UserType_PromoRules_set.objects.filter(status=0):
+                message = f"You have to remove the existing rule first to add new rule"
+                messages.warning(request, message)
+            elif not rules_count > 1:
                 message = f"You have to remove the existing rule first to add new rule"
                 messages.warning(request, message)
             else:
                 new_Facility = UserType_PromoRules_set(user_type=newuser, title=title, adv_booking=adv_booking, lim_booking=lim_booking, cancel_fee=cancel_fee, description=description, status=status)
                 new_Facility.save()
+
     else:
         # Facility doesn't exist, check if title exists
         if UserType_PromoRules_set.objects.filter(title=title).exists():
@@ -3097,7 +3152,7 @@ def displayall_setting_usertype(request):
     # usertype = User.objects.all
     setting_usertype = Setting_UserType.objects.all().order_by('id')   
     firstname = request.session.get('firstname') 
-    usertype = User_Type.objects.all()
+    usertype = UserType_Rules.objects.all()
     if request.method == 'POST':
         forms = RulesUserTypeForm(request.POST)
         user_typers = UserTypeRulesForm(request.POST)
@@ -3133,7 +3188,7 @@ def displayall_setting_usertype(request):
 @user_passes_test(is_superuser)
 def set_user_session(request, user_id):
     # Set the 'facility_id' session variable to the clicked facility's ID
-    request.session['user_id'] = user_id
+    request.session['user_id'] = user_id    
     return redirect('facility:listofuser') 
 
 

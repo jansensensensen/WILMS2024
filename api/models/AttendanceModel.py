@@ -15,7 +15,6 @@ class Attendance(models.Model):
     signOutTime=models.TimeField(null=True,default=None)   
     isOverstaying= models.BooleanField(default=False, null=True)
     isSignedIn=models.BooleanField(default=False, null=True)
-    venueName=models.CharField(max_length=50,null=True)
     venueId=models.IntegerField(null=True,default=0)    
     name=models.CharField(max_length=50,null=True)
     booking=models.ForeignKey(Booking,related_name='booking',to_field='id',on_delete=models.CASCADE)

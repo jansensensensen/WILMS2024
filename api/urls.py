@@ -22,8 +22,10 @@ urlpatterns = [
     path('createBooking/',CalendarController.saveBooking,name='create booking'),
     path('currentBookings/',CalendarController.getCurrentBookings,name='current bookings'),
     path('getEvents/', CalendarController.getEvents, name='get events'),
+    path('getRules/<user_type>/', CalendarController.getRules, name='get rules'),
     ##Controllers na wa pa na separate
     path('getAttendees/<id>/',AttendeeDetail.as_view(),name='getBookingAttendees'),
+    # path('getBooking/<id>/',DetailsController.getBooking,name='getBookingDetails'),
     # path('users/',Users.as_view(),name='getAllUsers'),
 
     #view details na controller

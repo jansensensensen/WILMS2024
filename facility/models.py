@@ -5,16 +5,30 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from wallet.models import User
-# Create your models here.
-class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    # Other fields as needed for your notification model
+# from wallet.models import User
+# # Create your models here.
+# class Notification(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     message = models.CharField(max_length=255)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     # Other fields as needed for your notification model
 
+#     def __str__(self):
+#         return self.message 
+    
+class Facility_type(models.Model):
+    facility_type=models.CharField(max_length=250, null=False, unique="facility_type")
+    created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
+    modified_at = models.DateTimeField(default=timezone.now, null=False)
+    isdeleted = models.BooleanField(default=0)
+
+    def save(self, *args, **kwargs):
+            # Update the modified_at timestamp whenever the object is saved
+        self.modified_at = timezone.now()
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return self.message 
+        return self.facility_type
 
 class Facility(models.Model):
     facilityname = models.CharField(max_length=250, null=False, unique="facility_name")
@@ -30,6 +44,9 @@ class Facility(models.Model):
     num_attendies = models.IntegerField(null=True)
     description = models.CharField(max_length=255,null=True, default="")
     status = models.BooleanField(default=0)
+    is_conference = models.BooleanField(default=0)
+    # facility_type = models.ForeignKey(Facility_type, null=True, on_delete=models.CASCADE)
+
 
     def save(self, *args, **kwargs):
         # Update the modified_at timestamp whenever the object is saved
@@ -38,20 +55,6 @@ class Facility(models.Model):
     
     def __str__(self):
         return self.facilityname
-
-class Facility_type(models.Model):
-    facility_type=models.CharField(max_length=250, null=False, unique="facility_type")
-    created_at = models.DateTimeField(default=timezone.now, editable=False, null=False)
-    modified_at = models.DateTimeField(default=timezone.now, null=False)
-    isdeleted = models.BooleanField(default=0)
-
-    def save(self, *args, **kwargs):
-            # Update the modified_at timestamp whenever the object is saved
-        self.modified_at = timezone.now()
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.facility_type
     
 
 class Facility_MainRules(models.Model):
@@ -373,7 +376,7 @@ class Transaction(models.Model):
     
 # ----------------------------------------------------------------------------------------------------------------------USER
 class UserType_Rules(models.Model):
-    user_type = models.CharField(max_length=100,null=True,default=None)
+    user_type = models.CharField(max_length=100,null=True,default=None, unique="user_type")
     title = models.CharField(max_length=100,null=False)
     description = models.CharField(max_length=255,null=False)
     status = models.BooleanField(default=0)

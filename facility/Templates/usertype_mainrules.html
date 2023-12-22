@@ -56,8 +56,8 @@
     
 <!-- ----------------------------------------------User RULES----------------------------------------------------------- -->
 
-<div class="label-page" style="padding: 10px;">USER<a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:umainback' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
-    <div class="table">
+<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:usertable' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div>
+<div class="table">
       {% csrf_token %}
       <div class="margin">
         <input type="text" class="facilabel" value="{{suser.user_type}}" style=" font-size: larger; height: fit-content; width: 35%; margin-top: 1rem;" disabled>
@@ -67,7 +67,7 @@
           <tbody class="tablerule">
             {% for u in umainrules %} 
           <tr>
-            <td name="mainrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td name="promo" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delumstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -80,7 +80,7 @@
           <tbody class="tablerule">
           {% for u in usubrules %} 
           <tr>
-            <td name="subrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td name="promo" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delusstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -93,7 +93,7 @@
           <tbody class="tablerule">
             {% for u in upromorules %} 
           <tr>
-            <td name="promorule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td name="promo" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delupstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -104,28 +104,20 @@
     </card>
     <button class="setbtn" style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"  data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->
-          <a href="{% url 'facility:setumstatus_one' %}">Set</a>
+          <a class="set" href="{% url 'facility:setumstatus_one' %}">Set</a>
           </button>
 
           <div class="vline"></div>
           <div class="menurules" style="border: 1px solid #DCDCDC;">
             <button class="mrules" style="background-color: #ffcc01;"><a href="{% url 'facility:userRules' suser.id %}" style="color: #FFFFFF; ">Main Rules</a></button>
-            <button class="srules"#ffcc01><a href="{% url 'facility:userSubRules' suser.id %}">Sub Rules</a></button>
+            <button class="srules"><a href="{% url 'facility:userSubRules' suser.id %}">Sub Rules</a></button>
             <button class="prules"><a href="{% url 'facility:userPromoRules' suser.id %}">Promo Rules</a></button>
           </div>
           <!-- <form method="POST"> {% csrf_token %} -->
-          <div id="overflowTest" style="margin-left: 33rem; height: 400px; ">
-          {% for u in addedmainrules %}
-          <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setumstatus' u.id %}">Add</a></button>
-          <!-- <button class="btneditrules"style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:updateumainrules' u.id %}">Edit</a></button> -->
-          <button class="btndelrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;" data-bs-toggle="modal" data-bs-target="#warning-{{ u.id}}" data-usertype-mainrule-title="{{ u.title }}"  data-usertype-mainrules-id="{{ u.id }}">Delete</button> 
-            <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
-              
-              <h3 class="titletxt">{{ u.title }}</h3><br>
-              <div class="hline"></div>
-              <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">
-                {% for u in addedpromorules %} 
-                <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setupstatus' u.id %}">Add</a></button>
+
+              <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">              
+                {% for u in addedmainrules %}             
+                <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setumstatus' u.id %}">Add</a></button>
                 <!-- <button class="btneditrules"style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:updateupromorules' u.id %}">Edit</a></button> -->
                 <button class="btndelrules" style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;" data-bs-toggle="modal" data-bs-target="#warning-{{ u.id}}" data-usertype-mainrule-title="{{ u.title }}"  data-usertype-mainrules-id="{{ u.id }}">Delete</button>  
                 <div class="cardrule" style="padding:10px; background:#ffcc000d; margin-bottom: 1rem; box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.25); ">
@@ -134,39 +126,28 @@
                   <div class="hline"></div>
                   
                   <section style="margin:10px; font-size: 14px;  height: 400px;">
-                  <ul style="width: fit-content; ">
-                    <li>Description: {{ u.description }}</li>
-
-                  </ul>
-                  <br>
-                  <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div>
-                </section>
-                </div>
+                    <ul style="width: fit-content; ">
+                      <li>Description: {{ u.description }}</li>
+                      <li>Description: {{ u.start_date }}</li>
+                      <li>Description: {{ u.end_date }}</li>
+                    </ul>
+                    <br>
+                    <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div>
+                  </section>
+                  </div>
                   {% empty %}
                   <h3 style="opacity: 0.3;">No Available Rules</h3>
                   {% endfor %}
                 </div>
-              <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">
-              <ul style="width: fit-content; ">
-
-              </ul>
-              
-              <div class="hline" style="margin-top: 2.8rem; border-bottom: none;"></div>
-            </section>
-            </div>
-            {% empty %}
-            <h3 style="opacity: 0.3;">No Available Rules</h3>
-            {% endfor %}
-          </div>
         <!-- </form> -->
-    </div>
+    </div><br>
     <button data-bs-toggle="modal" data-bs-target="#staticBackdrop"  type="button" class="btnrules" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Rules</button>
     <!-- <button type="submit" class="add-fac" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Facility</button> -->
 
   </div>
     
   </div>
- 
+
 
   {% endblock %}
 

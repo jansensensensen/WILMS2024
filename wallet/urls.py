@@ -1,5 +1,5 @@
 from django.urls import path
-from wallet.views import AccountStatusView, GetUserStatusView, IndexView, RegisterView, UserLoginView, DashboardView, UserListView,UserLogoutView,UserDashboardView,PointsDashboardView, TransactionApprovalView,SuccessRedirectView,CoinTransactionCreateAndDashboardView,GetTransactionDetailsView,SettingsView,ChangePasswordView, UpdateAccountTypeView, TeacherUserListView, AdminAwardPointsToTeacherView, ActivateAccountView,ScanAndDisplayRFIDView,EditUserProfileView
+from wallet.views import AccountStatusView, GetUserStatusView, IndexView, RegisterView, UserLoginView, DashboardView, UserListView,UserLogoutView,UserDashboardView,PointsDashboardView, TransactionApprovalView,SuccessRedirectView,CoinTransactionCreateAndDashboardView,GetTransactionDetailsView,SettingsView,ChangePasswordView, TeacherUserListView, AdminAwardPointsToTeacherView, ActivateAccountView,ScanAndDisplayRFIDView,EditUserProfileView, UserTypeRulesView,UpdateAccountTypeView
 # Increment 2
 from django.conf import settings
 from django.conf.urls.static import static  
@@ -35,7 +35,7 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 
     # INCREMENT 4
-    path('update_account_type/<int:id>/', UpdateAccountTypeView.as_view(), name='update_account_type'),
+    # path('update_account_type/<int:id>/', UpdateAccountTypeView.as_view(), name='update_account_type'),
     path('teacher_user_list/', TeacherUserListView.as_view(), name='teacheruserlist'),
 
     # BONUS CONTENT
@@ -54,6 +54,14 @@ urlpatterns = [
     #ACCOUNT Status
     path('account_status/<int:user_id>/', AccountStatusView.as_view(), name='account_status'),
     path('get_user_status/<int:user_id>/', GetUserStatusView.as_view(), name='get_user_status'),
+
+
+    # path('user_list/', views.create_usertype, name='create_usertype'),
+
+    path('user-type-rules/', UserTypeRulesView.as_view(), name='user_type_rules'),
+    # create_usertype
+
+    path('update_account_type/<int:user_id>/', UpdateAccountTypeView.as_view(), name='update_account_type'),
 
   
 

@@ -70,6 +70,17 @@
       background: url("{% static 'img/basebg.PNG' %}") no-repeat;
   background-size: cover;
     }
+
+    .form-container {
+      max-width: 400px;
+      margin: auto;
+      background-color: #000000; /* White background */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      align-items: center;
+    }
+
   </style>
   <div class="label-page">USER LIST</div>
   <div class="table" style="padding: 1px;">
@@ -83,6 +94,11 @@
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#transactionsTab"
         >Transactions</a
+      >
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#userTypeTab"
+        >User Type</a
       >
     </li>
   </ul>
@@ -114,7 +130,7 @@
                 <th>Point Balance</th>
                 <th>Award Points</th>
 
-                <th>User Type</th>
+                <th>Account Type</th>
                 <th>Change Account Type</th>
                 <th>Change Account Status</th>
               </tr>
@@ -140,13 +156,14 @@
                     data-pbal="{{user.point_balance}}"
                     data-acctype="{% if user.user.is_superuser %}Superuser{% elif user.user.is_staff %}Teacher User{% else %}Regular User{% endif %}"
                   >
-                    Award Points
+                    Award 
                   </button>
                 </td>
                 <td>
-                    {% if user.user.is_superuser %}Superuser{% elif user.user.is_staff %}Teacher User{% else %}Regular User{% endif %}
+                    <!-- {% if user.user.is_superuser %}Superuser{% elif user.user.is_staff %}Teacher User{% else %}Regular User{% endif %} -->
+                    {{user.user.user_type}}
                 </td>
-                <td>
+                <td style="align-items: center; text-align: center;">
                   <button
                     class="btn btn-primary changetype"
                     style="background-color: #9c7b16; width: 100px; height: fit-content;"
@@ -155,9 +172,10 @@
                     data-firstname="{{user.first_name}}"
                     data-lastname="{{user.last_name}}"
                     data-pbal="{{user.point_balance}}"
+                    data-usertype="{{user.user.user_type_id}}"
                     data-acctype="{% if user.user.is_superuser %}Superuser{% elif user.user.is_staff %}Teacher User{% else %}Regular User{% endif %}"
                   >
-                    Change Account Type
+                    Change
                   </button>
                 </td>
                 <td>
@@ -304,7 +322,7 @@
                   value="{{ request.user.id }}"
                 />
               </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="submit" name="submit_award_points_form" class="btn btn-primary" onclick="console.log(name)">Submit</button>
             </form>
           </div>
         </div>
@@ -400,6 +418,7 @@
                   data-firstname="{{ user.first_name }}" 
                   data-lastname="{{ user.last_name }}" 
                   data-pbal="{{ user.point_balance }}" 
+                  data-usertype="{{user.user.user_type_id}}"
                   data-acctype="{% if user.user.is_superuser %}Superuser{% elif user.user.is_staff %}Teacher User{% else %}Regular User{% endif %}">Change Account Type</button>
                   </button>
                 </div>
@@ -435,7 +454,7 @@
           </div>
           <div class="modal-body">
             <div class="container">
-              <h6 class="id" id="id">Account Type</h6>
+              <!-- <h6 class="id" id="id">Account Type</h6> -->
             </div>
 
             <p>User ID: <span id="modalUserId"></span></p>
@@ -445,22 +464,66 @@
             <form id="changeAccountTypeForm">
               <input type="hidden" id="userIdForChange" />
               <label for="newAccountType">Select the new account type:</label>
-              <select name="newAccountType" id="newAccountType">
-                <option value="Superuser">Superuser</option>
-                <option value="Regular User">Regular User</option>
-                <option value="Teacher User">Teacher User</option>
+              <select name="newAccountType" id="newAccountType" class="form-control">
+                  {% for user_type in usertype %}
+                      <option value="{{ user_type }}">{{ user_type }}</option>
+                  {% endfor %}
               </select>
+              <br>
               <button type="submit" class="btn btn-primary">
-                Change Account Type
+                  Change Account Type
               </button>
-            </form>
+          </form>
+          
           </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Tab for usertype -->
+    <div class="tab-pane fade" id="userTypeTab">
+      <div class="jumbotron" style="align-items: center;">
+        <h1 style="color: #000; text-align: center;">User Type</h1>
+        <div class="form-container">
+          <h2 class="text-center">User Type Rules Form</h2>
+          <form id="UserTypeRulesForm" method="post" action="{% url 'wallet:user_type_rules' %}">
+            {% csrf_token %}
+            {{ user_typers.as_p }} <!-- Render the form fields -->
+            <button type="submit" name="submit_user_type_rules_form" class="btn btn-primary btn-block mt-3">Submit</button>
+          </form>
+        </div>
+        
+        <!-- Include Bootstrap JS and Popper.js (optional) -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <div style=" display: flex;align-items: center; justify-content: center; margin-top: 30px; ">
+            <table  border="1"  class="table" style="max-width: 200px; outline: #000; text-align: center;">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">Account Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_type_value in usertype %}
+                <tr>
+                  <th scope="row">                    
+                    {{ user_type_value.user_type }}                    
+                  </th>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          
         </div>
       </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 
     <script>
       $(document).ready(function () {
@@ -513,7 +576,8 @@
                 firstname: firstName,
                 lastname: lastName,
                 pbal: pbal,
-                acctype: acctype
+                acctype: acctype,
+                usertype:usertype,
                 });
         });
 
@@ -626,18 +690,19 @@
                 var lastName = $(this).data("lastname");
                 var pbal = $(this).data("pbal");
                 var acctype = $(this).data("acctype");
+                var usertype = $(this).data("usertype");
 
                 console.log("Recipient:", recipient);
                 console.log("First Name:", firstName);
                 console.log("Last Name:", lastName);
                 console.log("Point Balance:", pbal);
-                console.log("Account Type:", acctype);
+                console.log("Account Type:", usertype);
 
                 // Populate the modal with data
                 $("#modalUserId").text(recipient);
                 $("#modalFirstName").text(firstName);
                 $("#modalLastName").text(lastName);
-                $("#modalAccountType").text(acctype);
+                $("#modalAccountType").text(usertype);
 
                 // Set the data in the "Change Account Type" modal
                 $("#userIdForChange").val(recipient);
@@ -647,44 +712,45 @@
             });
 
       // JavaScript for handling the form submission in the "Change Account Type" modal
-      $(document).on("submit", "#changeAccountTypeForm", function (event) {
-        event.preventDefault();
+            $(document).on("submit", "#changeAccountTypeForm", function (event) {
+          event.preventDefault();
+              console.log(user_id)
+          var user_id = $("#userIdForChange").val();
+          var newAccountType = $("#newAccountType").val();
+          console.log(newAccountType)
+          // Send an AJAX request to update the account type
+          $.ajax({
+              type: "POST",
+              url: `/wallet/update_account_type/${user_id}/`,
+              data: {
+                  newAccountType: newAccountType,
+                  csrfmiddlewaretoken: csrf_token,
+              },
+              dataType: 'json',
+              success: function (data) {
+                  if (data.success) {
+                    location.reload();
+                      alert(data.message);
+                      $("#changeAccountTypeModal").modal("hide");
+                      // Update the displayed account type in the "Actions" modal if needed
+                      // ...
 
-        var user_id = $("#userIdForChange").val();
-        var newAccountType = $("#newAccountType").val();
+                      // You can update other parts of the page with the updated data from the context
+                      // ...
 
-        if (newAccountType === "Superuser") {
-          var isSuperuser = true;
-          var isStaff = true;
-        } else if (newAccountType === "Teacher User") {
-          var isSuperuser = false;
-          var isStaff = true;
-        } else {
-          var isSuperuser = false;
-          var isStaff = false;
-        }
-
-        // Send an AJAX request to update the account type
-        $.ajax({
-          type: "POST",
-          url: "/wallet/update_account_type/" + user_id + "/",
-          data: {
-            user_id: user_id,
-            isSuperuser: newAccountType === 'Superuser', // Convert to true if Superuser
-            isStaff: newAccountType === 'Teacher User' || newAccountType === 'Superuser', // Convert to true if Teacher User or Superuser
-            csrfmiddlewaretoken: csrf_token,
-          },
-          success: function (data) {
-            if (data.success) {
-              alert("Account type changed successfully.");
-              $("#changeAccountTypeModal").modal("hide");
-              // Update the displayed account type in the "Actions" modal if needed
-              // ...
-            } else {
-              alert("Failed to change the account type.");
-            }
-          },
-        });
+                  } else {
+                    Swal.fire({
+        icon: 'info',
+        title: 'Info',
+        text: 'Changed the account type.',
+        showConfirmButton: false, // Hide the default "OK" button
+        timer: 1500, // Timer in milliseconds (3 seconds)
+    }).then(() => {
+        location.reload(); // Reload the page after 3 seconds
+    });
+                  }
+              },
+          });
       });
 
 

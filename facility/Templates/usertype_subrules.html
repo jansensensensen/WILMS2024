@@ -50,7 +50,7 @@
     
 <!-- ----------------------------------------------USER SUB RULES----------------------------------------------------------- -->
 
-<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:umainback' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
+<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:usertable' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
     <div class="table">
       {% csrf_token %}
       <div class="margin">
@@ -98,7 +98,7 @@
     </card>
     <button class="setbtn" style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"  data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->
-          <a href="{% url 'facility:setumstatus_one' %}">Set</a>
+          <a class="set"href="{% url 'facility:setumstatus_one' %}">Set</a>
           </button>
           <div class="vline"></div>
           <div class="menurules" style="border: 1px solid #DCDCDC;">
@@ -107,7 +107,7 @@
             <button class="prules"><a href="{% url 'facility:userPromoRules' suser.id %}">Promo Rules</a></button>
           </div>
           <!-- <form method="POST"> {% csrf_token %} -->
-          <div id="overflowTest" style="margin-left: 33rem; height: 400px;">
+            <div id="overflowTest" style=" padding-top: 0rem;  margin-left: 50%; height: 51vh; ">
           {% for u in addedsubrules %} 
           <button type="submit" class="btnaddrules" style="margin-left: 50%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:setusstatus' u.id %}">Add</a></button>
           <!-- <button class="btneditrules"style="margin-left: 2%; position: relative; top: 3rem; z-index: 999;"><a href="{% url 'facility:updateusubrules' u.id %}">Edit</a></button> -->
@@ -130,7 +130,7 @@
             {% endfor %}
           </div>
         <!-- </form> -->
-    </div>
+    </div><br>
     <button data-bs-toggle="modal" data-bs-target="#staticBackdrop"  type="button" class="btnrules" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Rules</button>    <!-- <button type="submit" class="add-fac" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Facility</button> -->
 
   </div>

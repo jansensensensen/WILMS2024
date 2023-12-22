@@ -25,9 +25,9 @@
             <td>{{ bookings.referenceNo }}</td>
             <td>{{ bookings.user_id }}</td>
             <td>{{ bookings.date }}</td>
-            {% if bookings.status == 'Pending' %}
+            {% if bookings.reserve_status == 'Pending' %}
 
-            <td style="color: orange">{{ bookings.status }}</td>
+            <td style="color: orange">{{ bookings.reserve_status }}</td>
 
             <td class="actions">
               <form
@@ -41,7 +41,7 @@
 
             {% else %}
 
-            <td style="color: green">{{ bookings.status }}</td>
+            <td style="color: green">{{ bookings.reserve_status }}</td>
 
             <td class="actions">
               <form

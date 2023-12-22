@@ -9,6 +9,5 @@ class Attendee(models.Model):
     name=models.CharField(max_length=50,null=True)
     user_id=models.IntegerField(null=True)
     booking=models.ForeignKey(Booking,related_name='attendees',on_delete=models.CASCADE,null=True)   
-    rfid=models.CharField(max_length=30,null=True)
     def __str__(self) -> str:
         return f"{self.name}"    

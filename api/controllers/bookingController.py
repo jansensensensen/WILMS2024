@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import *
 # from rest_framework.views import APIView
 from rest_framework import status
-from api.models import Booking,Venue,User as user,Attendee
+from api.models import Booking,Venue,Attendee
 from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer
 from wallet.models import User as WalletUser
 # from rest_framework.permissions import IsAuthenticated,AllowAny
@@ -18,7 +18,7 @@ from api.jwt_util import decode_user
 from rest_framework.decorators import api_view
 # from django.contrib.auth.models import User
 from django.http import JsonResponse
-from facility.models import Setting_Facility
+from facility.models import Facility
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
@@ -30,7 +30,6 @@ class BookingController():
         user_id=request_body['id']
         # chosen_date="2023-11-05"
         converted_date=datetime.datetime.strptime(chosen_date, "%Y-%m-%d")
-        
         
         monday=converted_date-datetime.timedelta(converted_date.weekday())
         sunday=monday+datetime.timedelta(days=6)
@@ -46,18 +45,10 @@ class BookingController():
         obj = WalletUser.objects.all()
         serializer = UserSerializer(obj,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
-    # @api_view(['POST'])
-    # def calculateCancelCost(request,booking_id):  
-    #     booking=Booking.objects.get(facility=booking_id)
-    #     #kuwang ug input start time ug end time
-    #     request_body = json.loads(request.body.decode('utf-8'))
-    #     # starttime split
-        
-    #     data={"cost":cost}
-    #     return JsonResponse(data)
+   
     @api_view(['POST'])
     def calculateCost(request,venue_id):  
-        facility=Setting_Facility.objects.get(facility=venue_id)
+        facility=Facility.objects.get(pk=venue_id)
         #kuwang ug input start time ug end time
         request_body = json.loads(request.body.decode('utf-8'))
         # starttime split
@@ -69,14 +60,23 @@ class BookingController():
        
         
         numComputers= request_body['numOfComputers']
-        
+        numStudents= request_body['numOfStudents']
         # data={"numOfStudents":numStudents}
-        cost=float(0)       
-        if(numComputers>0):
-            cost+=2*duration        
+        cost=float(1) 
+             
+        # if(numComputers>0):
+        #     cost+=2*duration        
+        # else:
+        #     cost+=duration
+        rate=0
+        # change rate per hour based on facility type
+        if facility.is_conference ==True:
+            rate=facility.rateperhour
         else:
-            cost+=duration
-        cost*=facility.facility.rateperhour
+            rate=facility.person_rateperhour*numStudents
+
+        
+        cost*=rate
         data={"cost":cost}
         return JsonResponse(data)
     # @api_view(['GET'])

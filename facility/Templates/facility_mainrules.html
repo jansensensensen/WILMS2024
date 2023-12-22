@@ -55,8 +55,8 @@
   </div>
     
 <!-- ----------------------------------------------FACILITY RULES----------------------------------------------------------- -->
-<div>
-    <div class="label-page" style="padding: 10px;">FACILITY <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:facimainback' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div>
+
+    <div class="label-page" style="padding: 10px;">FACILITY <a class="arrow-back" href="{% url 'facility:facilitytable' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div>
     <div class="table">
       {% csrf_token %}
       <div class="margin">
@@ -102,9 +102,9 @@
         </tbody>
         </table><br>
     </card>
-        <button class="setbtn"  style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"   data-bs-target="#staticBackdrop">
+    <button class="setbtn"  type="button"  data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->
-          <a href="{% url 'facility:setfmstatus_one' %}">Set</a>
+          <a class="set" href="{% url 'facility:setfmstatus_one' %}">Set</a>
           </button>
           <div class="vline"></div>
           <div class="menurules" style="border: 1px solid #DCDCDC;">

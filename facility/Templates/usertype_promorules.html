@@ -58,7 +58,7 @@
   </div>
     
 <!-- ----------------------------------------------USER SUB RULES----------------------------------------------------------- -->
-<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:umainback' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
+<div class="label-page" style="padding: 10px;">USER <a style="margin-left: 65vw; margin-top: 0rem; font-size: larger;" href="{% url 'facility:usertable' %}"><img style="height: 40%;" src="{% static 'media/arrow.png' %}" alt="Another Profile Picture"></a></div> 
     <div class="table">
       {% csrf_token %}
       <div class="margin">
@@ -69,7 +69,7 @@
           <tbody class="tablerule">
             {% for u in umainrules %} 
           <tr>
-            <td name="mainrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td class="promo" name="mainrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delumstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -82,7 +82,7 @@
           <tbody class="tablerule">
           {% for u in usubrules %} 
           <tr>
-            <td name="subrule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td class="promo" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delusstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -95,7 +95,7 @@
           <tbody class="tablerule">
             {% for u in upromorules %} 
           <tr>
-            <td name="promorule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
+            <td class="promo" name="promorule" style="width:20rem; font-weight: bold;" value="{{u.id}}">{{u.title}}</td>
             <td style="width:5rem;"><a href="{% url 'facility:delupstatus' u.id %}">🗑️</a></td>
             {% empty %}
             <p style=" opacity: 0.3; margin: 0rem; padding: 0rem;">no rules added</p>
@@ -106,7 +106,7 @@
     </card>
     <button class="setbtn" style=" margin-left: 10%; background-color: #FFCC01; color: #000000;"  type="button"  data-bs-target="#staticBackdrop">
           <!-- setfmstatus_one   -->
-          <a href="{% url 'facility:setumstatus_one' %}">Set</a>
+          <a class="set" href="{% url 'facility:setumstatus_one' %}">Set</a>
           </button>
           <div class="vline"></div>
           <div class="menurules" style="border: 1px solid #DCDCDC;">

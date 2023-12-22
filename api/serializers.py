@@ -3,11 +3,15 @@ from rest_framework import serializers
 from api.models import *
 from wallet.models import User as UserObject
 from facility.models import CalendarEvent
+from facility.models import UserType_Rules
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model=Booking
         fields=('__all__')
-
+class UserRulesrializer(serializers.ModelSerializer):
+    class Meta:
+        model=UserType_Rules
+        fields=('__all__')
 class VenueSerializer(serializers.ModelSerializer):
     class Meta:
         model=Venue
@@ -24,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AttendanceResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model=Attendance
-        fields=('name','id','date','signInTime','signOutTime','isOverstaying','isSignedIn','venueName','name','venueId', 'booking')
+        fields=('name','id','date','signInTime','signOutTime','isOverstaying','isSignedIn','venueId', 'booking')
 class BookingRequestSerializer(serializers.ModelSerializer):
     attendees=AttendeeSerializer(many=True)
     class Meta:

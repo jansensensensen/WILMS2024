@@ -129,8 +129,8 @@ class AdminReservedDashboardController(LoginRequiredMixin, View):
     def updateBookingStatus(self, id):
         booking = ResBooking.objects.get(pk=int(id))
         
-        if booking.status == "Pending":
-            booking.status = 'Booked'
+        if booking.reserve_status == "Pending":
+            booking.reserve_status = 'Booked'
             booking.save()
             
             timer = Timer(user_id=booking.user, minutes=60, seconds=0)

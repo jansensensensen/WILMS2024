@@ -11,7 +11,7 @@ from rest_framework import *
 # from rest_framework.views import APIView
 from rest_framework import status
 from api.models import Attendance
-from api.models import Booking,Venue,User as user,Attendee
+from api.models import Booking,Venue,Attendee
 from api.serializers import AttendanceResponseSerializer
 from facility.models import *
 # from rest_framework.permissions import IsAuthenticated,AllowAny
@@ -21,6 +21,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 # from django.contrib.auth.models import User
 from django.http import JsonResponse
+from facility.views import Facility
 # from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
@@ -48,24 +49,18 @@ class DashboardController():
         coworkingSpace=0
         timeNow=datetime.datetime.now().time()
         
-        setting_facilities = Setting_Facility.objects.all()
+        facility_rows = Facility.objects.all()
 
         facility_data = []
         # print(timeNow)
-        for facility in setting_facilities:
-            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.facility.id)
+        for facility in facility_rows:
+            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.pk)
             facility_count=0
             for attendanceObj in res:                
                 if(attendanceObj.booking.endTime>timeNow and timeNow>=attendanceObj.booking.startTime):
-                    # if(attendanceObj.venueName=='Conference Room A'):
-                    #     conferenceRoomA+=1
-                    # elif(attendanceObj.venueName=='Conference Room B'):
-                    #     conferenceRoomB+=1
-                    # elif(attendanceObj.venueName=='Coworking Space'):
-                    #     coworkingSpace+=1
                     facility_count+=1
             facility_dict = {
-                'facility_name':facility.facility.facilityname,
+                'facility_name':facility.facilityname,
                 'count':facility_count
                 
             }
@@ -73,19 +68,19 @@ class DashboardController():
         return Response(facility_data, status=status.HTTP_200_OK)
     @api_view(['GET'])
     def getWaiting(request):
-        setting_facilities = Setting_Facility.objects.all()
+        facility_rows = Facility.objects.all()
 
         facility_data = []
         timeNow=datetime.datetime.now().time()
-        for facility in setting_facilities:
-            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.facility.id)
+        for facility in facility_rows:
+            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.pk)
             facility_count=0        
             for attendanceObj in res:
                 if(attendanceObj.booking.endTime>timeNow and timeNow<attendanceObj.booking.startTime and attendanceObj.isSignedIn==True):
                     facility_count+=1
                     
             facility_dict={
-                'facility_name':facility.facility.facilityname,
+                'facility_name':facility.facilityname,
                 'count':facility_count
             }
             facility_data.append(facility_dict)
@@ -93,14 +88,14 @@ class DashboardController():
     
     @api_view(['GET'])
     def getOverstaying(request):
-        setting_facilities = Setting_Facility.objects.all()
+        facility_rows = Facility.objects.all()
 
         facility_data = []
         timeNow=datetime.datetime.now()
         timePlusFive=timeNow+datetime.timedelta(minutes=5)
-        for facility in setting_facilities:
+        for facility in facility_rows:
             count=0
-            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.facility.id)
+            res=Attendance.objects.filter(isSignedIn=True,venueId=facility.pk)
             for attendanceObj in res:
                 endtime=attendanceObj.booking.endTime
                 fulldate=datetime.datetime(100,1,1,endtime.hour,endtime.minute,endtime.second)
@@ -110,7 +105,7 @@ class DashboardController():
                 if((endtimePlusFive < timeNow.time() and attendanceObj.date==datetime.datetime.now().date() )or attendanceObj.date<datetime.datetime.now().date()):
                     count+=1
             facility_dict={
-                        'facility_name':facility.facility.facilityname,
+                        'facility_name':facility.facilityname,
                         'count':count
             }
             facility_data.append(facility_dict)
@@ -120,13 +115,13 @@ class DashboardController():
         conferenceRoomA=0
         conferenceRoomB=0
         coworkingSpace=0
-        setting_facilities = Setting_Facility.objects.all()
+        facility_rows = Facility.objects.all()
 
         facility_data = []
         timeNow=datetime.datetime.now().time()
-        for facility in setting_facilities:
+        for facility in facility_rows:
             count=0
-            res=Booking.objects.filter(date=datetime.datetime.now().date(),startTime__gt=timeNow, status="Booked",venue=facility.facility.id)
+            res=Booking.objects.filter(date=datetime.datetime.now().date(),startTime__gt=timeNow, status="Booked",venue=facility.pk)
             # print("res:")
             # print(res.count())
             for booking in res:
@@ -142,7 +137,7 @@ class DashboardController():
                 #     conferenceRoomB=conferenceRoomB+attendeeCount-bookingAttendanceCount
                 count=count+attendeeCount-bookingAttendanceCount
             facility_dict={
-                'facility_name':facility.facility.facilityname,
+                'facility_name':facility.facilityname,
                 'count':count
             }
             facility_data.append(facility_dict)

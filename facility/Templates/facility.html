@@ -9,14 +9,26 @@
         </div>
         <div class="modal-body">
           {% csrf_token %}
-          <input type="text" name="id" id="facilityIdInput" value="" hidden>
-          <!-- <input type="hidden" name="id" value="{{ f.id }}"> -->
-          <label class="modalpopup">Facility Name</label><br>
-          <!-- {{upform.facilityname}} -->
-          <input type="text" name="facilityname" value="{{ upform.instance.facilityname }}">
-          <label class="modalpopup">Capacity</label><br>
-          <!-- {{upform.facilityname}} -->
-          <input type="text" name="capacity" value="{{ upform.instance.capacity }}">
+
+            <input type="text" name="id" id="facilityIdInput" value="" hidden>
+            <!-- Render Facility Name field -->
+            <label class="modalpopup">Facility Name</label><br>
+            <input type="text" name="facilityname" value="{{ upform.instance.facilityname }}"><br>
+        
+            <!-- Render Capacity field -->
+            <label class="modalpopup">Capacity</label><br>
+            <input type="text" name="capacity" value="{{ upform.instance.capacity }}"><br>
+        
+            <!-- Render Facility Type (is_conference) field -->
+            <!-- <label class="modalpopup">Facility Type</label><br> -->
+            {% for radio in upform.is_conference %}
+            <label class="modalpopup">
+                {{ radio.tag }} {{ radio.choice_label }}
+            </label>
+        {% endfor %}
+            
+            <!-- Add a submit button -->
+
           <!-- <label class="modalpopup">Rate Per Hour</label><br>
           <input type="text" name="rateperhour" value="{{ upform.instance.rateperhour }}">
           <label class="modalpopup">Capacity</label><br>
@@ -99,6 +111,7 @@
               <th>FACILITY: RATE/HR</th>
               <th>PERSON: Rate/HR</th>
               <th>CAPACITY</th>
+              <th>CONFERENCE TYPE</th>
               <th>ACTION</th>
             </tr>
           </thead>
@@ -112,6 +125,13 @@
               <td>{{ f.rateperhour }}</td>
               <td>{{ f.person_rateperhour }}</td>
               <td>{{ f.capacity }}</td>
+              <td>
+                {% if f.is_conference %}
+                    Conference
+                {% else %}
+                    Co-Working
+                {% endif %}
+            </td>
               <td style="width: 20%;">
                 <button id="btnupdate" type="button" class="btndel" data-bs-toggle="modal" data-bs-target="#staticBackdrop2" 
                         data-facility-id="{{ f.id }}" data-facilityname="{{ f.facilityname }}" 

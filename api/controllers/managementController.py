@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import *
 # from rest_framework.views import APIView
 from rest_framework import status
-from api.models import Booking,Venue,User as user,Attendee
+from api.models import Booking,Venue,Attendee
 from api.serializers import BookingSerializer, VenueSerializer,BookingRequestSerializer,UserSerializer,AttendeeSerializer
 # from rest_framework.permissions import IsAuthenticated,AllowAny
 from api.jwt_util import decode_user

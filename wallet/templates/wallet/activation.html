@@ -308,25 +308,72 @@ a.menugroup {
     <ul class="center" >
       <div>
         <button class="adminlabel" id="koisk" style="left: 82%;"><a class="menugroup menugroup-action {% if 'home' in request.path %}active-link{% endif %}" href="{% url 'wallet:index' %}">😺 BACK TO MAIN PAGE</a></button></div>
-      {% if messages %}
-      {% for message in messages %}
-       
-          {% if message.tags == 'success' %}
-          <div>
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                <h4 style="margin:1px; font-size: 16px;">✅ Success!</h4>{{ message }}</div>
-          {% elif message.tags == 'warning' %}
-          <div>
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-              <h4 style="margin:1px; font-size: 16px;">⚠️ Warning!</h4>{{ message }}</div>
-          {% elif message.tags == 'error' %}
-          <div>
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                <h4 style="margin:1px; font-size: 16px;">⛔ Oops!</h4>{{ message }}</div>
-          {% endif %} 
-        {% endfor %}
-        {% endif %}
+    
+  <!-- Include SweetAlert script -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.querySelector(".login-form");
+    const rfidForm = document.querySelector(".rfid-form");
+    const loginButton = document.getElementById("login-btn");
+    const activateButton = document.getElementById("activate-btn");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    loginButton.addEventListener("click", function () {
+      // Get the input values
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      // Simulate authentication success (you should replace this with your actual authentication logic)
+      const isAuthenticated = true;
+
+      if (isAuthenticated) {
+        // Authentication is successful, proceed to show the RFID form
+        loginForm.classList.add("hidden");
+        rfidForm.classList.remove("hidden");
+        activateButton.classList.remove("hidden");
+      } else {
+        // Display an error message using SweetAlert
+        Swal.fire({
+          icon: "error",
+          title: "Authentication Error",
+          text: "Invalid login credentials. Please try again.",
+        });
+      }
+    });
+
+    // Add SweetAlert for activation success
+    document.getElementById("activation-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Simulate activation success (you should replace this with your actual activation logic)
+      const isActivationSuccessful = true;
+
+      if (isActivationSuccessful) {
+        // Display a success message using SweetAlert
+        Swal.fire({
+          icon: "success",
+          title: "Account Activated",
+          showConfirmButton: false,
+          timer: 3000,
+        }).then(() => {
+          // Redirect or perform additional actions after SweetAlert closes, if needed
+          window.location.href = "{% url 'wallet:activate_account' %}";
+        });
+      } else {
+        // Display an error message using SweetAlert
+        Swal.fire({
+          icon: "error",
+          title: "Activation Failed",
+          text: "Failed to activate the account. Please try again.",
+        });
+      }
+    });
+  });
+</script>
+
   
-  </ul>
   </body>
 </html>
