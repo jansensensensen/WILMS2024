@@ -260,6 +260,7 @@ class UserListView(View):
         firstname = request.session.get('firstname') 
         usertype = UserType_Rules.objects.all()
         user_typers = UserTypeRulesForm()
+        transactions = Transaction.objects.all().order_by('-date')
 
         # Fetch the users
         users = UserProfileInfo.objects.all()
@@ -288,7 +289,8 @@ class UserListView(View):
             'users': users,
             'firstname': firstname,
             'usertype': usertype, 
-            'user_typers': user_typers
+            'user_typers': user_typers,
+            'transactions': transactions,
         }
 
         return render(request, self.template_name, context)
@@ -894,48 +896,84 @@ class ActivateAccountView(View):
         print(user)
 
         if user:
-            # Check if the user exists and is not active
             user_profile = UserProfileInfo.objects.get(user=user)
             print(user)
             print(user_profile)
-            
 
             if not user.is_verified:
-                # Check if the user is not verified
                 if user_profile.rfid_value is None:
-                    # If the RFID value is initially null, store the submitted RFID value
                     user_profile.rfid_value = rfid_value
                     user_profile.save()
                     print(user_profile.rfid_value)
 
                 if rfid_value == user_profile.rfid_value:
-                    # If the RFID value matches the stored value, activate the user's account
                     user.is_active = True
-                    user.is_verified = True  # Mark the user as verified
+                    user.is_verified = True
                     user.save()
-                    message = f"Account Activated"
-                    messages.success(request, message)
-                    # return render(request, 'wallet/activate_account.html')
-                    return HttpResponse('<script>alert("Account Activated"); window.location.href="/wallet/activate_account/";</script>')
+
+                    # Embed SweetAlert for success
+                    return HttpResponse('''
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Account Activated',
+                                    text: 'Your account has been successfully activated.',
+                                }).then(function() {
+                                    window.location.href = "/wallet/activate_account/";
+                                });
+                            });
+                        </script>
+                    ''')
                 else:
-                    message = f"Invalid RFID value"
-                    messages.warning(request, message)
-                    # return render(request, 'wallet/activate_account.html')
-                    return JsonResponse({'success': False, 'message': 'Invalid RFID value.'})
+                    # Embed SweetAlert for error
+                    return HttpResponse('''
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Invalid RFID value',
+                                    text: 'The RFID value provided is invalid.',
+                                }).then(function() {
+                                    window.location.href = "/wallet/activate_account/";
+                                });
+                            });
+                        </script>
+                    ''')
             else:
-                # return JsonResponse({'success': False, 'message': 'The account is already verified and active.'})
-                message = f"The account is already verified and active."
-                messages.warning(request, message)
-                # return render(request, 'wallet/activate_account.html')
-                return HttpResponse('<script>alert("The account is already verified and active."); window.location.href="/wallet/activate_account/";</script>')
-                
+                # Embed SweetAlert for error
+                return HttpResponse('''
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Account Already Active',
+                                text: 'The account is already verified and active.',
+                            }).then(function() {
+                                window.location.href = "/wallet/activate_account/";
+                            });
+                        });
+                    </script>
+                ''')
         else:
-            message = f"Invalid login details supplied or the account is already active"
-            messages.error(request, message)
-            # return render(request, 'wallet/activate_account.html')
-            # return JsonResponse({'success': False, 'message': 'Invalid login details supplied or the account is already active.'})
-            return HttpResponse('<script>alert("Invalid login details supplied or the account is already active"); window.location.href="/wallet/activate_account/"</script>')
-  
+            # Embed SweetAlert for error
+            return HttpResponse('''
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Login Details',
+                            text: 'Invalid login details supplied or the account is already active.',
+                        }).then(function() {
+                            window.location.href = "/wallet/activate_account/";
+                        });
+                    });
+                </script>
+            ''')
 
 # Grab values
 class ScanAndDisplayRFIDView(View):
