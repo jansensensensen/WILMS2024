@@ -896,22 +896,25 @@ class ActivateAccountView(View):
         print(user)
 
         if user:
+            # Check if the user exists and is not active
             user_profile = UserProfileInfo.objects.get(user=user)
             print(user)
             print(user_profile)
+            
 
             if not user.is_verified:
+                # Check if the user is not verified
                 if user_profile.rfid_value is None:
+                    # If the RFID value is initially null, store the submitted RFID value
                     user_profile.rfid_value = rfid_value
                     user_profile.save()
                     print(user_profile.rfid_value)
 
                 if rfid_value == user_profile.rfid_value:
+                    # If the RFID value matches the stored value, activate the user's account
                     user.is_active = True
-                    user.is_verified = True
+                    user.is_verified = True  # Mark the user as verified
                     user.save()
-
-                    # Embed SweetAlert for success
                     return HttpResponse('''
                         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                         <script>
@@ -927,7 +930,6 @@ class ActivateAccountView(View):
                         </script>
                     ''')
                 else:
-                    # Embed SweetAlert for error
                     return HttpResponse('''
                         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                         <script>
@@ -943,7 +945,7 @@ class ActivateAccountView(View):
                         </script>
                     ''')
             else:
-                # Embed SweetAlert for error
+                # return JsonResponse({'success': False, 'message': 'The account is already verified and active.'})
                 return HttpResponse('''
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     <script>
@@ -958,8 +960,9 @@ class ActivateAccountView(View):
                         });
                     </script>
                 ''')
+                
         else:
-            # Embed SweetAlert for error
+            # return JsonResponse({'success': False, 'message': 'Invalid login details supplied or the account is already active.'})
             return HttpResponse('''
                 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                 <script>
