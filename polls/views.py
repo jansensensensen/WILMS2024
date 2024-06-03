@@ -123,9 +123,60 @@ def user_logout(request):
     logout(request)
     return redirect('polls:user_login')
 
+# @login_required(redirect_field_name="polls:userlogin")
+# def user_dashboard(request):
+    
+#     area_bookings = AssignedArea.objects.values('area_id').annotate(booked_count=models.Count('area_id'))
+    
+#     areas = []
+#     for area_id in ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9"]:
+#         if area_id == "A1" or area_id == "A2":
+#             total_count = 1
+#         elif area_id == "A7":
+#             total_count = 24
+#         else:
+#             total_count = 6
+
+#         area_data = next((item for item in area_bookings if item['area_id'] == area_id), {'booked_count': 0})
+#         areas.append({'area_id': area_id, 'booked_count': area_data['booked_count'], 'total_count': total_count})
+
+    
+#     try:
+#         reservedbookingcount = ResBooking.objects.filter(user_id=request.user.id).count()
+#         booking = ResBooking.objects.filter(user_id=request.user.id).first()  
+        
+#         if reservedbookingcount > 0 and booking:
+#             if booking.status == "Pending":
+#                 venue_id = booking.referenceNo
+#                 context = {
+#                     'area_id': venue_id[:2],
+#                     'reference_number': booking.referenceNo,
+#                     'date': booking.date,
+#                 }
+#                 return render(request, "wil/activebooking.html", context)
+#             else:
+#                 timer = Timer.objects.get(user_id=request.user.id)
+#                 context = {
+#                     'id_number': booking.user_id,
+#                     'booking_reference_number': booking.referenceNo,
+#                     'assigned_area': booking.venue_id,
+#                     'date_of_use': booking.date,
+#                     'timer_data': {
+#                         'minutes': timer.minutes,
+#                         'seconds': timer.seconds,
+#                     }
+#                 }
+#                 return render(request, "wil/timer.html", context)
+#     except Booking.DoesNotExist:
+#         areas = []
+#         for area_id in ["A1", "A2", "A3", "A4", "A5", "A6"]:
+#             area_data = next((item for item in area_bookings if item['area_id'] == area_id), {'booked_count': 0})
+#             total_count = 6
+#             areas.append({'area_id': area_id, 'booked_count': area_data['booked_count'], 'total_count': total_count})
+
+#     return render(request, "wil/userdashboard.html", {'areas': areas})
 @login_required(redirect_field_name="polls:userlogin")
 def user_dashboard(request):
-    
     area_bookings = AssignedArea.objects.values('area_id').annotate(booked_count=models.Count('area_id'))
     
     areas = []
@@ -140,7 +191,6 @@ def user_dashboard(request):
         area_data = next((item for item in area_bookings if item['area_id'] == area_id), {'booked_count': 0})
         areas.append({'area_id': area_id, 'booked_count': area_data['booked_count'], 'total_count': total_count})
 
-    
     try:
         reservedbookingcount = ResBooking.objects.filter(user_id=request.user.id).count()
         booking = ResBooking.objects.filter(user_id=request.user.id).first()  
@@ -155,18 +205,22 @@ def user_dashboard(request):
                 }
                 return render(request, "wil/activebooking.html", context)
             else:
-                timer = Timer.objects.get(user_id=request.user.id)
-                context = {
-                    'id_number': booking.user_id,
-                    'booking_reference_number': booking.referenceNo,
-                    'assigned_area': booking.venue_id,
-                    'date_of_use': booking.date,
-                    'timer_data': {
-                        'minutes': timer.minutes,
-                        'seconds': timer.seconds,
+                try:
+                    timer = Timer.objects.get(user_id=request.user.id)
+                    context = {
+                        'id_number': booking.user_id,
+                        'booking_reference_number': booking.referenceNo,
+                        'assigned_area': booking.venue_id,
+                        'date_of_use': booking.date,
+                        'timer_data': {
+                            'minutes': timer.minutes,
+                            'seconds': timer.seconds,
+                        }
                     }
-                }
-                return render(request, "wil/timer.html", context)
+                    return render(request, "wil/timer.html", context)
+                except Timer.DoesNotExist:
+                    # Handle the case where the Timer does not exist
+                    return redirect('polls:userdashboard')
     except Booking.DoesNotExist:
         areas = []
         for area_id in ["A1", "A2", "A3", "A4", "A5", "A6"]:
