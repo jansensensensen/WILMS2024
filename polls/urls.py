@@ -27,4 +27,5 @@ urlpatterns = [
     path('get-calendar-data/', views.get_calendar_data, name='get_calendar_data'),
     path('wiluser/activewalkinbooking/', views.activewalkinbooking, name='activewalkinbooking'),
     path('wiluser/walkin-booking-history/', views.walkin_booking_history, name='walkinbookinghistory'),  
+    path('delete_booking/', views.delete_booking, name='delete_booking'),
 ] 

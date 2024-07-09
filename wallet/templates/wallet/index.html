@@ -663,8 +663,8 @@ button.btn-primary{
           functions ensuring optimal user flow. Join us for a streamlined
           innovation experience.
         </p>
-        <!-- <a href="http://172.16.103.217/booking/login" class="btn" target="_blank">Book Now</a> -->
         <a href="http://127.0.0.1:8000/booking/login" class="btn" target="_blank">Book Now</a>
+        {% comment %} <a href="http://172.16.103.217/booking/login" class="btn" target="_blank">Book Now</a> {% endcomment %}
       </div>
     </section>
     <div
@@ -782,13 +782,15 @@ button.btn-primary{
       {% if request.user.is_authenticated %} {% if request.user.is_superuser %}
       <button class="adminlabel" style="left:46%;"><a class="menugroup" href="{% url 'wallet:index' %}">HOME</a></button>
       <button class="adminlabel" style="left:52%;"><a class="menugroup" href="{% url 'facility:facility' %}">FACILITY</a></button>
-      <button class="adminlabel" style="left:60%; border: 0px;"><a class="menugroup" href="http://172.16.103.217/booking/login">BOOKING</a></button>
+      {% comment %} <button class="adminlabel" style="left:60%; border: 0px;"><a class="menugroup" href="http://172.16.103.217/booking/login">BOOKING</a></button> {% endcomment %}
+      <button class="adminlabel" style="left:60%; border: 0px;"><a class="menugroup" href="http://127.0.0.1:8000/booking/login">BOOKING</a></button>
       <button class="adminlabel" style="left:68%;"><a class="menugroup" href="{% url 'wallet:dashboard' %}">WALLET</a></button>
       <button class="adminlabel" style="left:75%;"><a class="menugroup" href="{% url 'admindashboard' %}">CROWD CONTROL</a></button>
       <button class="adminlabel" style="width: fit-content;left:90%;" ><a class="menugroup" style=" color: #f5f2e9;" href="{% url 'wallet:logout' %}">LOGOUT</a></button>
       {% else %}
       <button class="adminlabel" style="left:56%;"><a class="menugroup" href="{% url 'wallet:index' %}">HOME</a></button>
-      <button class="adminlabel" style="left:63%;"><a class="menugroup" href="http://172.16.103.217/booking/login">BOOKING</a></button>
+      {% comment %} <button class="adminlabel" style="left:63%;"><a class="menugroup" href="http://172.16.103.217/booking/login">BOOKING</a></button> {% endcomment %}
+      <button class="adminlabel" style="left:63%;"><a class="menugroup" href="http://127.0.0.1:8000/booking/login">BOOKING</a></button>
       <button class="adminlabel" style="left:72%;"><a class="menugroup" href="{% url 'wallet:usrdashboard' %}">WALLET</a></button>
       <button class="adminlabel" style="left:80%;"><a class="menugroup" href="{% url 'polls:userdashboard' %}">WALK-IN</a></button>
       <button class="adminlabel" style="width: fit-content;left:87%;" ><a class="menugroup" style=" color: #5b4705;" href="{% url 'wallet:logout' %}">LOGOUT</a></button>

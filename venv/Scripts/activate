@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Jansen\Documents\WILMS-SERVER\venv"
+VIRTUAL_ENV="C:\Users\Querbin\OneDrive\Documents\GitHub\WILMS-SERVER\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

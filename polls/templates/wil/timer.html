@@ -208,7 +208,21 @@ function confirmEndSession() {
               messageOverlay.appendChild(messageBox);
 
               document.body.appendChild(messageOverlay);
-
+              
+              $.ajax({
+                url: '{% url "polls:delete_booking" %}',
+                method: 'POST',
+                data: { booking_reference_number: referenceNumber },
+                headers: {
+                    "X-CSRFToken": csrfToken
+                },
+                success: function(deleteData) {
+                    console.log('Booking data deleted successfully:', deleteData);
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.error('Failed to delete booking data:', xhr.responseText);
+                }
+            });
               
               $('#timer').text('00:00');
 
