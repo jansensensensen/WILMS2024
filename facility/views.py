@@ -754,7 +754,7 @@ def restoreFacility(request, id):
     facility = get_object_or_404(Facility, pk=id)
     set_fac = Setting_Facility.objects.filter(facility=id)
     count = Facility.objects.filter(isdeleted=0).count()
-    limit_facility = 8 
+    limit_facility = 9 
     if facility.isdeleted:
         if count == limit_facility:
             message = "Restricted, only 8 facility available for WILMS"

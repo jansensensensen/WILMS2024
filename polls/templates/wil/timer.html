@@ -183,54 +183,33 @@ function confirmEndSession() {
       },
       success: function(data) {
           
-          if (data.success) {
-              
-              var referenceNumber = '{{ booking_reference_number }}';
-              var messageOverlay = document.createElement('div');
-              messageOverlay.classList.add('message-overlay');
+        if (data.success) {
 
-              var messageBox = document.createElement('div');
-              messageBox.classList.add('message-box');
+          var referenceNumber = '{{ booking_reference_number }}';
+          console.log('Reference Number:', referenceNumber);
+            $.ajax({
+                  url: '{% url "polls:delete_booking" %}',
+                  method: 'POST',
+                  data: { booking_reference_number: referenceNumber },
+                  headers: {
+                      "X-CSRFToken": csrfToken
+                  },
+                  success: function(deleteData) {
+                      console.log('Booking data deleted successfully:', deleteData);
+                  },
+                  error: function(xhr, textStatus, errorThrown) {
+                      console.error('Failed to delete booking data:', xhr.responseText);
+                  }
+              });
 
-              var messageHeader = document.createElement('h2');
-              messageHeader.textContent = 'Session Ended';
+            $('#timer').text('00:00');
 
-              var messageContent = document.createElement('p');
-              messageContent.innerHTML = 'Reference ID: ' + referenceNumber;
+            window.location.href = '/polls/wiluser/userprofile/'
+            hideConfirmationDialog();
 
-              var additionalText = document.createElement('p');
-              additionalText.textContent = 'To avoid overstaying charges, please go to the front desk and present your reference number to confirm that your allotted time has ended.';
-
-              messageBox.appendChild(messageHeader);
-              messageBox.appendChild(messageContent);
-              messageBox.appendChild(additionalText);
-
-              messageOverlay.appendChild(messageBox);
-
-              document.body.appendChild(messageOverlay);
-              
-              $.ajax({
-                url: '{% url "polls:delete_booking" %}',
-                method: 'POST',
-                data: { booking_reference_number: referenceNumber },
-                headers: {
-                    "X-CSRFToken": csrfToken
-                },
-                success: function(deleteData) {
-                    console.log('Booking data deleted successfully:', deleteData);
-                },
-                error: function(xhr, textStatus, errorThrown) {
-                    console.error('Failed to delete booking data:', xhr.responseText);
-                }
-            });
-              
-              $('#timer').text('00:00');
-
-              
-              hideConfirmationDialog();
-          } else {
-              alert('Failed to end the session. Please try again.');
-          }
+        } else {
+            alert('Failed to end the session. Please try again.');
+        }
       },
       error: function(xhr, textStatus, errorThrown) {
           console.log(xhr.responseText); 

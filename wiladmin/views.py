@@ -142,11 +142,13 @@ class AdminReservedDashboardController(LoginRequiredMixin, View):
         else:
             booking.delete()
             
-            usertimer = Timer.objects.get(pk=str(booking.user))
-            usertimer.delete()
+            try:
+                usertimer = Timer.objects.get(user_id=booking.user)
+                usertimer.delete()
+            except Timer.DoesNotExist:
+                pass # Timer does not exist, no need to do anything
             
-            assignedarea = AssignedArea.objects.all().filter(reference_number=booking.referenceNo)
-            assignedarea.delete()
+            AssignedArea.objects.filter(reference_number=booking.referenceNo).delete()
             
             log = AdminReportLogsModel(referenceid=booking.referenceNo, userid=booking.user, starttime=booking.startTime, endtime=str(datetime.now().strftime("%d/%m/%Y, %H:%M")), status='Logged Out')
             log.save()
@@ -275,15 +277,16 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
     
     #Thsi will GET current count
     def GetAreaCount(self):
-        countA1 = AssignedArea.objects.filter(area_id='A1').count()
-        countA2 = AssignedArea.objects.filter(area_id='A2').count()
-        countA3 = AssignedArea.objects.filter(area_id='A3').count()
-        countA4 = AssignedArea.objects.filter(area_id='A4').count()
-        countA5 = AssignedArea.objects.filter(area_id='A5').count()
-        countA6 = AssignedArea.objects.filter(area_id='A6').count()
-        countA7 = AssignedArea.objects.filter(area_id='A7').count()
-        countA8 = AssignedArea.objects.filter(area_id='A8').count()
-        countA9 = AssignedArea.objects.filter(area_id='A9').count()
+        current_time = timezone.localtime()
+        countA1 = AssignedArea.objects.filter(area_id='A1').count() + ResBooking.objects.filter(referenceNo__startswith="A1", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA2 = AssignedArea.objects.filter(area_id='A2').count() + ResBooking.objects.filter(referenceNo__startswith="A2", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA3 = AssignedArea.objects.filter(area_id='A3').count() + ResBooking.objects.filter(referenceNo__startswith="A3", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA4 = AssignedArea.objects.filter(area_id='A4').count() + ResBooking.objects.filter(referenceNo__startswith="A4", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA5 = AssignedArea.objects.filter(area_id='A5').count() + ResBooking.objects.filter(referenceNo__startswith="A5", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA6 = AssignedArea.objects.filter(area_id='A6').count() + ResBooking.objects.filter(referenceNo__startswith="A6", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA7 = AssignedArea.objects.filter(area_id='A7').count() + ResBooking.objects.filter(referenceNo__startswith="A7", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA8 = AssignedArea.objects.filter(area_id='A8').count() + ResBooking.objects.filter(referenceNo__startswith="A8", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA9 = AssignedArea.objects.filter(area_id='A9').count() + ResBooking.objects.filter(referenceNo__startswith="A9", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
         
         area_count = [{
             'countA1':countA1, 
@@ -305,15 +308,16 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
     #The refresh.js ajax will then replace the value with the new value
     #P.S. made it not nested array for easy access in ajax
     def update_workspaces(request):
-        countA1 = AssignedArea.objects.filter(area_id='A1').count()
-        countA2 = AssignedArea.objects.filter(area_id='A2').count()
-        countA3 = AssignedArea.objects.filter(area_id='A3').count()
-        countA4 = AssignedArea.objects.filter(area_id='A4').count()
-        countA5 = AssignedArea.objects.filter(area_id='A5').count()
-        countA6 = AssignedArea.objects.filter(area_id='A6').count()
-        countA7 = AssignedArea.objects.filter(area_id='A7').count()
-        countA8 = AssignedArea.objects.filter(area_id='A8').count()
-        countA9 = AssignedArea.objects.filter(area_id='A9').count()
+        current_time = timezone.localtime()
+        countA1 = AssignedArea.objects.filter(area_id='A1').count() + ResBooking.objects.filter(referenceNo__startswith="A1", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA2 = AssignedArea.objects.filter(area_id='A2').count() + ResBooking.objects.filter(referenceNo__startswith="A2", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA3 = AssignedArea.objects.filter(area_id='A3').count() + ResBooking.objects.filter(referenceNo__startswith="A3", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA4 = AssignedArea.objects.filter(area_id='A4').count() + ResBooking.objects.filter(referenceNo__startswith="A4", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA5 = AssignedArea.objects.filter(area_id='A5').count() + ResBooking.objects.filter(referenceNo__startswith="A5", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA6 = AssignedArea.objects.filter(area_id='A6').count() + ResBooking.objects.filter(referenceNo__startswith="A6", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA7 = AssignedArea.objects.filter(area_id='A7').count() + ResBooking.objects.filter(referenceNo__startswith="A7", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA8 = AssignedArea.objects.filter(area_id='A8').count() + ResBooking.objects.filter(referenceNo__startswith="A8", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA9 = AssignedArea.objects.filter(area_id='A9').count() + ResBooking.objects.filter(referenceNo__startswith="A9", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
             
         area_count = {
             'countA1':countA1,
@@ -331,6 +335,7 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
     def get(self, request):
         
         area_count = self.GetAreaCount
+        current_time = timezone.localtime()
         walkin_users_A1 = WalkinBookingModel.objects.filter(referenceid__contains="A1")
         walkin_users_A2 = WalkinBookingModel.objects.filter(referenceid__contains="A2")
         walkin_users_A3 = WalkinBookingModel.objects.filter(referenceid__contains="A3")
@@ -341,15 +346,15 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
         walkin_users_A8 = WalkinBookingModel.objects.filter(referenceid__contains="A8")
         walkin_users_A9 = WalkinBookingModel.objects.filter(referenceid__contains="A9")
         
-        reserve_users_A1 = ResBooking.objects.filter(referenceNo="A1")
-        reserve_users_A2 = ResBooking.objects.filter(referenceNo="A2")
-        reserve_users_A3 = ResBooking.objects.filter(referenceNo="A3")
-        reserve_users_A4 = ResBooking.objects.filter(referenceNo="A4")
-        reserve_users_A5 = ResBooking.objects.filter(referenceNo="A5")
-        reserve_users_A6 = ResBooking.objects.filter(referenceNo="A6")
-        reserve_users_A7 = ResBooking.objects.filter(referenceNo="A7")
-        reserve_users_A8 = ResBooking.objects.filter(referenceNo="A8")
-        reserve_users_A9 = ResBooking.objects.filter(referenceNo="A9")
+        reserve_users_A1 = ResBooking.objects.filter(referenceNo__startswith="A1", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A2 = ResBooking.objects.filter(referenceNo__startswith="A2", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A3 = ResBooking.objects.filter(referenceNo__startswith="A3", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A4 = ResBooking.objects.filter(referenceNo__startswith="A4", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A5 = ResBooking.objects.filter(referenceNo__startswith="A5", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A6 = ResBooking.objects.filter(referenceNo__startswith="A6", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A7 = ResBooking.objects.filter(referenceNo__startswith="A7", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A8 = ResBooking.objects.filter(referenceNo__startswith="A8", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
+        reserve_users_A9 = ResBooking.objects.filter(referenceNo__startswith="A9", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
         
         
         walkin_users = {
