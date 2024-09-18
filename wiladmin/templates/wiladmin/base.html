@@ -94,22 +94,22 @@ button#koisk:hover{
         <div class="list-group list-group-flush">
           {% if user.is_authenticated %}
           <a
-            href="admindashboard"
+            href="{% url 'admindashboard' %}"
             class="list-group-item list-group-item-action {% if 'admindashboard' in request.path %}active-link{% endif %}"
             >Dashboard</a
           >
           <a
-            href="walkindashboard"
+            href="{% url 'walkindashboard' %}"
             class="list-group-item list-group-item-action {% if 'walkindashboard' in request.path %}active-link{% endif %}"
             >Walk-in Dashboard</a
           >
           <a
-            href="reserveddashboard"
+            href="{% url 'reserveddashboard' %}"
             class="list-group-item list-group-item-action {% if 'reserveddashboard' in request.path %}active-link{% endif %}"
             >Reserved Dashboard</a
           > 
           <a
-            href="workspaces"
+            href="{% url 'workspaces' %}"
             class="list-group-item list-group-item-action {% if 'workspaces' in request.path %}active-link
                                                           {% elif 'A1' in request.path %}active-link
                                                           {% elif 'A2' in request.path %}active-link
@@ -125,13 +125,13 @@ button#koisk:hover{
           >
 
           <a
-            href="bookguest"
+            href="{% url 'bookguest' %}"
             class="list-group-item list-group-item-action {% if 'bookguest' in request.path %}active-link{% endif %}"
             >Book Guest</a
           >
 
           <a
-            href="reportlogs"
+            href="{% url 'reportlogs' %}"
             class="list-group-item list-group-item-action {% if 'reportlogs' in request.path %}active-link{% endif %}"
             >Report Logs</a
           >

@@ -11,7 +11,7 @@ class AdminAccountModel(models.Model):
 class AdminReportLogsModel(models.Model):
     logid = models.AutoField(primary_key=True);
     referenceid = models.CharField(max_length=20);
-    userid = models.CharField(max_length=20);
+    userid = models.CharField(max_length=100);
     starttime = models.CharField(max_length=100);
     endtime = models.CharField(max_length=100);
     status = models.CharField(max_length=20);

@@ -133,24 +133,24 @@ class AdminReservedDashboardController(LoginRequiredMixin, View):
             booking.reserve_status = 'Booked'
             booking.save()
             
-            timer = Timer(user_id=booking.user, minutes=60, seconds=0)
+            timer = Timer(user_id=booking.user.id, minutes=60, seconds=0)
             timer.save()
             
-            log = AdminReportLogsModel(referenceid=booking.referenceNo, userid=booking.user, starttime=booking.startTime, endtime="", status='Booked')
+            log = AdminReportLogsModel(referenceid=booking.referenceNo, userid=booking.user.email, starttime=booking.startTime, endtime="", status='Booked')
             log.save()
         
         else:
             booking.delete()
             
             try:
-                usertimer = Timer.objects.get(user_id=booking.user)
+                usertimer = Timer.objects.get(user_id=booking.user.id)
                 usertimer.delete()
             except Timer.DoesNotExist:
                 pass # Timer does not exist, no need to do anything
             
             AssignedArea.objects.filter(reference_number=booking.referenceNo).delete()
             
-            log = AdminReportLogsModel(referenceid=booking.referenceNo, userid=booking.user, starttime=booking.startTime, endtime=str(datetime.now().strftime("%d/%m/%Y, %H:%M")), status='Logged Out')
+            log = AdminReportLogsModel(referenceid=booking.referenceNo, userid=booking.user.email, starttime=booking.startTime, endtime=str(datetime.now().strftime("%d/%m/%Y, %H:%M")), status='Logged Out')
             log.save()
     
     def get(self, request):
@@ -195,12 +195,12 @@ class AdminReportLogsController(LoginRequiredMixin,View):
         logs = AdminReportLogsModel.objects.all().order_by('-logid')[:30]
         return render(request, "wiladmin/logs.html", {'logs': logs})
     
+    # GET method to fetch all report logs
     def get(self, request):
         logs = self.getAllReportLogs
         return render(request, "wiladmin/logs.html", {'logs': logs})
     
     def post(self, request):
-        
         if 'export_button' in request.POST:
             messages.success(request, "Report Logs has been exported successfully")
             return self.exportlogs(request)
@@ -216,15 +216,16 @@ class BookGuestController(LoginRequiredMixin, View):
         return render(request, 'wiladmin/bookguest.html',context)
     
     def post(self, request):
-        countA1 = AssignedArea.objects.filter(area_id='A1').count()
-        countA2 = AssignedArea.objects.filter(area_id='A2').count()
-        countA3 = AssignedArea.objects.filter(area_id='A3').count()
-        countA4 = AssignedArea.objects.filter(area_id='A4').count()
-        countA5 = AssignedArea.objects.filter(area_id='A5').count()
-        countA6 = AssignedArea.objects.filter(area_id='A6').count()
-        countA7 = AssignedArea.objects.filter(area_id='A7').count()
-        countA8 = AssignedArea.objects.filter(area_id='A8').count()
-        countA9 = AssignedArea.objects.filter(area_id='A9').count()
+        current_time = timezone.localtime()
+        countA1 = AssignedArea.objects.filter(area_id='A1').count() + ResBooking.objects.filter(referenceNo__startswith="A1", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA2 = AssignedArea.objects.filter(area_id='A2').count() + ResBooking.objects.filter(referenceNo__startswith="A2", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA3 = AssignedArea.objects.filter(area_id='A3').count() + ResBooking.objects.filter(referenceNo__startswith="A3", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA4 = AssignedArea.objects.filter(area_id='A4').count() + ResBooking.objects.filter(referenceNo__startswith="A4", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA5 = AssignedArea.objects.filter(area_id='A5').count() + ResBooking.objects.filter(referenceNo__startswith="A5", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA6 = AssignedArea.objects.filter(area_id='A6').count() + ResBooking.objects.filter(referenceNo__startswith="A6", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA7 = AssignedArea.objects.filter(area_id='A7').count() + ResBooking.objects.filter(referenceNo__startswith="A7", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA8 = AssignedArea.objects.filter(area_id='A8').count() + ResBooking.objects.filter(referenceNo__startswith="A8", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
+        countA9 = AssignedArea.objects.filter(area_id='A9').count() + ResBooking.objects.filter(referenceNo__startswith="A9", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time).count()
         form = BookGuest(request.POST)
         
         if form.is_valid():
@@ -336,15 +337,15 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
         
         area_count = self.GetAreaCount
         current_time = timezone.localtime()
-        walkin_users_A1 = WalkinBookingModel.objects.filter(referenceid__contains="A1")
-        walkin_users_A2 = WalkinBookingModel.objects.filter(referenceid__contains="A2")
-        walkin_users_A3 = WalkinBookingModel.objects.filter(referenceid__contains="A3")
-        walkin_users_A4 = WalkinBookingModel.objects.filter(referenceid__contains="A4")
-        walkin_users_A5 = WalkinBookingModel.objects.filter(referenceid__contains="A5")
-        walkin_users_A6 = WalkinBookingModel.objects.filter(referenceid__contains="A6")
-        walkin_users_A7 = WalkinBookingModel.objects.filter(referenceid__contains="A7")
-        walkin_users_A8 = WalkinBookingModel.objects.filter(referenceid__contains="A8")
-        walkin_users_A9 = WalkinBookingModel.objects.filter(referenceid__contains="A9")
+        walkin_users_A1 = WalkinBookingModel.objects.filter(referenceid__contains="A1", status='Booked')
+        walkin_users_A2 = WalkinBookingModel.objects.filter(referenceid__contains="A2", status='Booked')
+        walkin_users_A3 = WalkinBookingModel.objects.filter(referenceid__contains="A3", status='Booked')
+        walkin_users_A4 = WalkinBookingModel.objects.filter(referenceid__contains="A4", status='Booked')
+        walkin_users_A5 = WalkinBookingModel.objects.filter(referenceid__contains="A5", status='Booked')
+        walkin_users_A6 = WalkinBookingModel.objects.filter(referenceid__contains="A6", status='Booked')
+        walkin_users_A7 = WalkinBookingModel.objects.filter(referenceid__contains="A7", status='Booked')
+        walkin_users_A8 = WalkinBookingModel.objects.filter(referenceid__contains="A8", status='Booked')
+        walkin_users_A9 = WalkinBookingModel.objects.filter(referenceid__contains="A9", status='Booked')
         
         reserve_users_A1 = ResBooking.objects.filter(referenceNo__startswith="A1", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
         reserve_users_A2 = ResBooking.objects.filter(referenceNo__startswith="A2", reserve_status='Booked', startTime__lte=current_time, endTime__gte=current_time)
@@ -385,8 +386,11 @@ class ViewWorkspacesController(LoginRequiredMixin, View):
     
     def post(self, request, areaid):
         area_count = self.GetAreaCount
-        area = WalkinBookingModel.objects.filter(referenceid__contains=areaid) #and Booking.objects.filter(reference_number__contains=areaid)
-        return render(request, 'wiladmin/workspaces.html', {'area':area, 'area_count':area_count, 'area_id':areaid})
+        walkin_area = WalkinBookingModel.objects.filter(referenceid__contains=areaid)
+        booking_area = ResBooking.objects.filter(referenceNo__startswith=areaid)
+
+        combined_area = list(walkin_area) + list(booking_area)
+        return render(request, 'wiladmin/workspaces.html', {'area':combined_area, 'area_count':area_count, 'area_id':areaid})
 
 class TestController(View):
     
