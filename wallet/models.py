@@ -27,7 +27,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_type = models.ForeignKey(UserType_Rules, null=True, on_delete=models.CASCADE)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)  # Set default to True for students
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
     is_disabled = models.BooleanField(default=False)
     
 
