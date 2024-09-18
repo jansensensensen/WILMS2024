@@ -48,13 +48,6 @@ export default function DashBoardTemplate(props) {
     { name: "Crowd Control", path: "/wiladmin/admindashboard" },
     
   ];
-  const mainNavItemsUser = [
-    { name: "Home", path: "/wallet" },
-    { name: "Booking", path: "/booking/calendar" },
-    { name: "Wallet", path: "/wallet/usrdashboard/" },
-    { name: "Crowd Control", path: "/polls/wiluser/userdashboard/" },
-    
-  ];
 
   //admin sidenav
   const adminNavItems = [
@@ -118,60 +111,7 @@ export default function DashBoardTemplate(props) {
 
   const Navigation = () => {
     if (user?.role !== "admin") {
-      return (
-        <List
-          sx={{
-            marginLeft: "auto",
-            display: "flex",
-            fontSize: "1.2rem",
-          }}
-        >
-          {mainNavItemsUser.map((item, index) => (
-            <Button
-              key={index}
-              className="adminapps"
-              sx={{
-                ...(item.path === location.pathname
-                  ? selectedStyle
-                  : unselectedStyle),
-                "&:hover": {
-                  bgcolor: "transparent",
-                  textDecoration: "none",
-                  borderBottom: "1px solid black",
-                  paddingBottom: "1px",
-                  color: "white",
-                  transition: "color 0.1s",
-                  fontWeight: 770,
-                  fontSize: "1.4rem",
-                  fontFamily: "Poppins",
-                },
-              }}
-              href={
-                item.path.startsWith("http") || item.name === "Booking"
-                  ? item.path
-                  : `${BASE_URL}${item.path}`
-              }
-              target="_blank" //opens in a new tab
-            >
-              <ListItemButton>
-                <ListItemText
-                  primary={item.name}
-                  primaryTypographyProps={{
-                    style: {
-                      fontWeight: 770,
-                      fontSize: "1.4rem",
-                      fontFamily: "Poppins",
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </Button>
-          ))}
-          <Button sx={logoutButtonStyle} onClick={() => logoutUser()}>
-            <Typography fontFamily="Poppins">Logout</Typography>
-          </Button>
-        </List>
-      );
+      return null;
     }
 
     return (
